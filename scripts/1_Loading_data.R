@@ -35,7 +35,7 @@ view(db_geih)
 ### Filtering the data
 # Details of the variable age 
 summary(db_geih$age)
-sum(is.na(db_geih$age))
+sum(is.na(db_geih$age)) # Checking for missing values
 class(db_geih$age)
 
 db_geih_filtered <- db_geih[db_geih$age > 18, ]
@@ -51,3 +51,22 @@ length(sorted_missing) # Correspond to the number of variables in the GEIH: 178
 
 view(sorted_missing)  # Display the vector in decreasing order
 view(top_missing)     # Display the vector with the variables that have the most missing values
+
+## Dealing with 0 wages
+names(db_geih_filtered)   # Checking variables names
+
+# Verification of the min and max value of the main resultant variables, and their missing values
+summary(db_geih_filtered$p6500)           # Monthly labor income. DANE Variable
+summary(db_geih_filtered$y_ingLab_m)      # labor income salaried nominal monthly
+summary(db_geih_filtered$y_ingLab_m_ha)   # labor income salaried nominal hourly
+summary(db_geih_filtered$y_salary_m)      # salary - nominal monthly
+summary(db_geih_filtered$y_salary_m_hu)   # salary - real hourly (usual)
+
+missing_income <- sum(is.na(db_geih_filtered$y_ingLab_m_ha))
+obs <- nrow(db_geih_filtered)
+
+# The 59.32% of the observations for the main resultant variables have missing values
+missing_perc = (missing_income/obs)*100
+missing_perc
+
+view(db_geih_filtered$y_ingLab_m_ha)
