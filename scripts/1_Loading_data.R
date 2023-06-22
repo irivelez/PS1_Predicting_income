@@ -32,7 +32,10 @@ db_list <- lapply(1:10, function(i) {
 db_geih <- do.call(rbind,db_list) # Concatenate the tables in a dataframe
 view(db_geih)
 
-### Filtering the data
+
+### Transforming data
+
+##Filtering the data
 # Details of the variable age 
 summary(db_geih$age)
 sum(is.na(db_geih$age)) # Checking for missing values
@@ -40,6 +43,17 @@ class(db_geih$age)
 
 db_geih_filtered <- db_geih[db_geih$age > 18, ]
 summary(db_geih_filtered$age)
+
+save(db_geih_filtered, file = "data.Rdata")
+
+''' Revisar
+# Save the resulting database in the local repository
+# Specify the file path and name for the output file
+output_db <- "Home/Documents/Repositorios/PS1_Predicting_incom/stores/db_geih_filtered"
+
+# Save the database as a CSV file
+write.csv(db_geih_filtered, file = output_db, row.names = FALSE)
+'''
 
 ## Dealing with missing values
 # Count missing values for each column and sorting
