@@ -1,5 +1,5 @@
 ##########################################################
-# Example Script
+# Example Script. Este es un script de prueba
 # author: Ignacio Sarmiento-Barbieri
 ##########################################################
 
