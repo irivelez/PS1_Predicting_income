@@ -1,6 +1,6 @@
 ---
 title: "Problem Set 1 RMarkdown"
-author: "Miguel Victoria"
+author: "Irina Vélez - Lucía Fillippo - Daniel Casas - Miguel Victoria"
 date: "2023-06-21"
 output: word_document
 ---
