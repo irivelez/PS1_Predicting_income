@@ -13,7 +13,7 @@
 
 install.packages("pacman") #Instalar librería si no contamos con esta 
 library(pacman) #Llamar librería
-p_load("tidyverse","stargazer")
+p_load("tidyverse","stargazer", "rvest")
 rm(list = ls()) #Limpia las variables que existan al momento de correr el código
 
 #######################    Scraping de las bases de datos a usar    ######################
@@ -75,9 +75,10 @@ View(educ)
 DGEIH<-subset(DatosGEIH_18, select = c( "ingtot", "pet", "mes", "age", "sex","ocu", "oficio") ) #Hacemos un subset con las variables a usar
 DGEIH<-cbind(DGEIH, exp, educ) #Incluimos las variables calculadas que utilizaremos en el modelo
 View(DGEIH) # Aquí aún no hemos quitado las observaciones "NA" 
-DGEIH<- DGEIH[DGEIH$ingtot>0,]
-summary(DGEIH) #Visualización general de la base de datos
-
+DGEIH<- DGEIH[DGEIH$ingtot>0,]  #Este ingreso no tiene "NA" pero sí tiene ceros, aquí los limpiamos
+summary(DGEIH) #Visualización general de la base de datos... peeero, no está horario el salario
+DGEIH<- DGEIH[(DGEIH$ingtot)/744,]  #Este ingreso no tiene "NA" pero sí tiene ceros, aquí los limpiamos
+length(DGEIH$ingtot)
 # Aquí la idea es quitar las observaciones "NA"
 cantidad_na <- sapply(DGEIH, function(x) sum(is.na(x)))
 cantidad_na <- data.frame(cantidad_na)
