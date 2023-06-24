@@ -44,7 +44,7 @@ class(db_geih$age)
 db_geih_filtered <- db_geih[db_geih$age > 18, ]
 summary(db_geih_filtered$age)
 
-save(db_geih_filtered, file = "data.Rdata")
+save(db_geih_filtered, file = "/Users/irina/Documents/R Projects/PS1/stores/data.Rdata")
 
 ''' Revisar
 # Save the resulting database in the local repository
