@@ -10,21 +10,109 @@ if(!require(pacman)) install.packages("pacman") ; require(pacman)
 
 ## Automatiza cargue de paquetes
 require(pacman)
-p_load(rio, # import/export data
-       tidyverse, # tidy-data
-       skimr, # summary data
+p_load(rio, 
+       tidyverse, 
+       skimr,
        caret,
        rstudioapi,
-       rvest) # Classification And REgression Training
+       rvest) 
 ```
 
 ```{r path, include=FALSE}
-# Directorio 
 rm(list=ls())
 getwd()
 path_sript <- rstudioapi::getActiveDocumentContext()$path
 path_folder <- dirname(path_sript)
 setwd(path_folder)
+```
+
+```{r Import_data, eval=FALSE, include=FALSE}
+### Loading data  
+data_url = "https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_"
+
+# Loop
+db_list <- lapply(1:10, function(i) {
+  url <- paste0(data_url, "page_", i, ".html")
+  page <- read_html(url) 
+  tabla <- page %>% html_table
+  db_geih <- data.frame(tabla)
+})
+
+db_geih <- do.call(rbind,db_list) # Concatenate the tables in a dataframe
+view(db_geih)
+```
+
+```{r Transforming_data, eval=FALSE, include=FALSE}
+##Filtering the data to those over 18 and employed (ocu=1)
+# Details of the variable age 
+summary(db_geih$age)
+sum(is.na(db_geih$age)) # Checking for missing values
+sum(is.na(db_geih$ocu))
+
+db_geih_filtered <- db_geih[db_geih$age > 18 & db_geih$ocu == 1, ]
+save(db_geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
+
+## Dealing with missing values
+# Count missing values for each column and sorting
+missing_counts <- sapply(db_geih_filtered, function(x) sum(is.na(x)))
+sorted_missing <- sort(missing_counts, decreasing = TRUE)
+top_missing <- head(sorted_missing, 30)
+top_missing
+
+# Deleting the top missing variables and all variables that start with cclasnr
+delete_var <- c("p550", "p7310", "p7350", "p7422", "p7422s1", "p7472", "p7472s1", "ina", "imdi", "imdies", "y_gananciaNetaAgro_m", "iof3ies", "y_accidentes_m", "p6585s4a2", "y_subEducativo_m", "isaes", "iof2es", "dominio", "clase")
+delete_var2 <- grep("^cclasnr", names(db_geih_filtered), value = TRUE)
+delete_t <- c(delete_var, delete_var2)
+
+geih_filtered <- db_geih_filtered %>%
+  select(-one_of(delete_t))
+
+## Dealing with 0 wages
+
+# Verification of the min and max value of the main resultant variables, and their missing values
+summary(geih_filtered$p6500)           # Monthly labor income. DANE Variable
+summary(geih_filtered$y_ingLab_m)      # labor income salaried nominal monthly
+summary(geih_filtered$y_ingLab_m_ha)   # labor income salaried nominal hourly
+summary(geih_filtered$y_salary_m)      # salary - nominal monthly
+summary(geih_filtered$y_salary_m_hu)   # salary - real hourly (usual)
+
+missing_income <- sum(is.na(geih_filtered$y_ingLab_m_ha))
+obs <- nrow(geih_filtered)
+
+# The 40.32% of the observations for the main resultant variables have missing values
+missing_perc = (missing_income/obs)*100
+missing_perc
+
+missing_values <- is.na(geih_filtered$y_salary_m_hu)
+missing_data <- geih_filtered[missing_values, c("estrato1", "maxEducLevel")]
+
+missing_by_estrato <- table(missing_data$estrato1)
+missing_by_educ <- table(missing_data$maxEducLevel)
+
+
+missing_by_estrato <- sort(missing_by_estrato, decreasing = TRUE)
+missing_by_educ <- sort(missing_by_educ, decreasing = TRUE)
+
+missing_by_estrato_p <- missing_by_estrato / sum(missing_by_estrato) * 100
+missing_by_educ_p <- missing_by_educ / sum(missing_by_educ) * 100
+
+missing_by_estrato_p
+missing_by_educ_p
+
+# Data frame with the results
+results <- data.frame(estrato = names(missing_by_estrato_p),
+                      educacion = names(missing_by_educ_p),
+                      p_missing_estrato = missing_by_estrato_p,
+                      p_missing_educacion = missing_by_educ_p)
+
+knitr::kable(results, caption = "Missing Values by Estrato and Educación")
+
+geih_filtered <- geih_filtered[complete.cases(geih_filtered$y_salary_m_hu), ]
+save(geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
+```
+
+```{r Import_DB, include=FALSE}
+load("../stores/data.Rdata")
 ```
 
 # Taller 1
@@ -35,7 +123,6 @@ El presente informe presenta la solución al Problem Set 1 de la clase Big Data 
 
 Conocer el valor de los ingresos de las personas es fundamental para el pago de impuestos y para identificar a los hogares que requieren apoyos sociales; no obstante, en algunas ocasiones estos valores no se conocen al no ser reportados, de manera que poder determinar su valor se convierte en un gran insumo para el desarrollo de políticas tributarias y sociales. Con objeto de lo anterior, el objetivo principal de este documento es construir un modelo predictivo de los salarios por hora de los individuos, a partir del siguiente modelo:
 
-
 $$
 w=f(X)+u
 $$
@@ -44,54 +131,6 @@ donde w representa el salario por hora y X es una matriz de potenciales variable
 
 Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, por lo que es pertinente identificar el link principal del cual se realizará la extracción de la información; además, se apliará un código en bucle para que la extracción de la informacíon sea más eficiente.Por último, como fue indicado, se realiza un primer filtro para tener en cuenta únicamente los individuos mayores de 18 años.
 
-```{r Import_data, eval=FALSE, include=FALSE}
-## Revisión preliminar
-#1
-
-# url1 <- "https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_page_1.html"
-# prueba1 <- read_html(url1)
-# prueba1_tablas <- prueba1 %>% 
-#   html_table()
-# prueba_data_frame1 <- data.frame(prueba1_tablas)
-# 
-# #2
-# 
-# url2 <- "https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_page_2.html"
-# prueba2 <- read_html(url2)
-# prueba_tablas2 <- prueba2 %>% 
-#   html_table()
-# prueba_data_frame2 <- data.frame(prueba_tablas2)
-
-
-## Creación del loop
-# Crear un data frame vacío para almacenar las tablas
-datos <- data.frame()
-
-for (i in 1:10) {
-  # Paso 1: Construir la URL
-  url <- paste0("https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_page_", i, ".html")
-  
-  # Paso 2: Leer el HTML de la URL
-  prueba <- read_html(url)
-  
-  # Paso 3: Extraer las tablas del HTML
-  tablas <- prueba %>% html_table()
-  
-  # Paso 4: Convertir la tabla en data frame
-  tabla <- data.frame(tablas)
-  
-  # Paso 5: Concatenar la tabla al data frame final
-  datos <- rbind(datos, tabla)
-}
-rm(prueba)
-rm(tabla)
-rm(tablas)
-
-# Revisión preliminar
-head(datos)
-any(grepl("directorio", datos$directorio))
-which(datos$directorio == 0)
-```
 
 ```{r limpiar_base, include=FALSE}
 # Filtro adultos
