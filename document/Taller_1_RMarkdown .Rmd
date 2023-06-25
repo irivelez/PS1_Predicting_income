@@ -19,7 +19,7 @@ p_load(rio,
        rvest,
        ggplot2) 
 ```
-
+>az
 ```{r path, include=FALSE}
 rm(list=ls())
 getwd()
@@ -120,19 +120,19 @@ geih_filtered <- geih_filtered[complete.cases(geih_filtered$maxEducLevel), ]
 
 # Taller 1
 
-El presente informe presenta la solución al Problem Set 1 de la clase Big Data & Machine Learning, en donde se aplicaron diversos conceptos y herramientas para la predicción de modelos, el manejo de bases de datos grandes, entre otros. El repositorio GitHub se encuentra este documento y el código R, en donde se generaron todos los resultados. Este repositorio se encuentra en el siguiente link: (link del Github con el código)
+El presente informe presenta la solución al Problem Set 1 de la clase Big Data & Machine Learning, con el objetivo de aplicar diversos conceptos y herramientas para la predicción de modelos, el manejo de bases de datos grandes, entre otros. Para el desarrollo del trabajo se utilizó el repositorio GitHub el cual contiene información de la Gran Encuesta Integrada de Hogares - GEIH para el año 2018 (luego en word ponemos este hiperbínculo https://ignaciomsarmiento.github.io/GEIH2018_sample/); además, se empleó el sotware Rstudio para el manejo de los datos, generación de resultados y desarrollo del taller, cuyo código se encuentra en el siguiente link: (link del Github con el código)
 
 ## 1. Introducción
 
-Conocer el valor de los ingresos de las personas es fundamental para el pago de impuestos y para identificar a los hogares que requieren apoyos sociales; no obstante, en algunas ocasiones estos valores no se conocen al no ser reportados, de manera que poder determinar su valor se convierte en un gran insumo para el desarrollo de políticas tributarias y sociales. Con objeto de lo anterior, el objetivo principal de este documento es construir un modelo predictivo de los salarios por hora de los individuos, a partir del siguiente modelo:
+El valor de ingresos de las personas es un insumo esencial para el desarrollo de políticas públicas, ya sea para identificar a los hogares que tienen la posibilidad de pagar más impuestos, así como para lograr una mejor focalización en aquellos hogares que requieren apoyos sociales; no obstante, en algunas ocasiones los ingresos de las personas no son reportados, de manera que esto se convierte en una barrera para el desarrollo de políticas públicas eficientes. En virtud de lo anterior, poder determinar el valor de los ingresos de las personas se convierte en un gran insumo para el desarrollo de políticas tributarias y sociales, razón por la cual el objetivo principal de este documento es construir un modelo predictivo de los salarios por hora de los individuos, a partir del siguiente modelo:
 
 $$
 w=f(X)+u
 $$
 
-donde w representa el salario por hora y X es una matriz de potenciales variables que explican el salario. Para la creación de este modelo se utilizarán datos de la Gran Encuesta Integrada de Hogares – GEIH del año 2018. 
+donde "w" representa el salario por hora y "X" es una matriz de potenciales variables que explican el salario. Como se mencionó previamente, para la creación de este modelo se utilizarán datos de la Gran Encuesta Integrada de Hogares – GEIH del año 2018. 
 
-Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, por lo que es pertinente identificar el link principal del cual se realizará la extracción de la información; además, se apliará un código en bucle para que la extracción de la informacíon sea más eficiente.Por último, como fue indicado, se realiza un primer filtro para tener en cuenta únicamente los individuos mayores de 18 años.
+Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, razón por la cual es pertinente identificar el link principal a partir del cual se realizará la extracción de la información. Para esto se aplicó un código en bucle para que la extracción de la informacíon de las distintas ventanas de la página web fuese más eficiente; además, se realizaron una serie de filtros a los datos, siguiendo las instrucciones dadas, con la finalidad de eliminar las variables "N/A" y considerar únicamente a los individuos mayores de 18 años.
 
 ```{r general_description, echo=FALSE}
 # Aquí hacemos la clasificación de variables
@@ -143,23 +143,61 @@ DGEIH<-subset(geih_filtered, select = c( "y_salary_m_hu", "pet", "mes", "age", "
 DGEIH<-cbind(DGEIH, exp) #Incluimos las variables calculadas que revisaremos
 
 summary(DGEIH)
+
 ```
 
-```{r age_description, echo=FALSE}
-# (1) Descripción general de la base
-dimen_dgeih <- dim(DGEIH)  #Número de filas y columnas
+## Análisis descriptivo
 
+Tras haber logrado una exitosa extración y organización de los datos, a continuación se realiza un análisis descriptivo de manera general y para cada una de las variables que conforman el modelo de predición del salario.
+
+```{r general_description, echo=FALSE}
+# (1) Descripción general de la base
+dimen_dgeih <- dim(geih_filtered)  #Número de filas y columnas
+dimen_dgeih
+# Obtener los nombres de las variables
+nombres_variables <- names(geih_filtered)
+# Imprimir los nombres de las variables
+print(nombres_variables)
+
+```
+
+De manera general, se identifica que nuestra base de datos está compuesta por 9.784 filas y por 151 columnas. Las variables que hacen parte de la base son: 
+
+- (y_salary_m_hu): Indica el salario mensual por hora de la persona
+- (pet): Indica si la persona hace parte de la Población en Edad de Trabajar - PET
+- (mes): Contiene el mes de referencia
+- (age): Contiene la edad de la persona
+- (sex): Contiene el sexo de la persona
+- (ocu): Señala si la persona es ocupada o no ocupada
+- (oficio): Indica el oficio de la persona
+- (maxEducLevel): Indicar el máximo nivel educativo alcanzado
+- (totalHoursWorked): Indica el total de horas trabajadas en el último mes
+- (exp): Hace referencia a la experiencia en años que tiene la persona
+
+Dicho lo anterior, a continuación se procede a realizar una descripción más amplia y gráfica de las variables que harán parte del modelo.
+
+## Edad
+
+```{r age_description, echo=FALSE}
 # (2) Descripción de la variable de edad
-Edad<- DGEIH$age
-edad_clas <- class(Edad)         #Aquí vemos la clase y nos dice que es de números enteros (integer)
-edad_media <- mean(Edad)          #Edad media: nos dice que es 42.95
-edad_min <- min(Edad)           #Edad mínima: 19
-edad_max <- max(Edad)           #Edad máxima: 106 años
+Edad<- geih_filtered$age
+edad_clas <- class(Edad)        #Aquí vemos la clase y nos dice que es de números enteros (integer)
+edad_media <- mean(Edad)        #Edad media
+edad_media
+edad_min <- min(Edad)           #Edad mínima
+edad_min
+edad_max <- max(Edad)           #Edad máxima
+edad_max
 modeEdad <- function(Edad){
   return(as.numeric(names(which.max(table(Edad)))))
 }
 edad_mod <- modeEdad(Edad)      #La moda de la edad es 25 años
+modeEdad(Edad)
+summary(Edad)
+```
+Para la variable de edad se observa un mínimo de 19 años, lo cual guarda sentido con la filtración inicial de los datos, donde se tuvo en cuenta únicamente a las personas mayores de 18 años, y en contraste se identifica un máximo de 86 años. En el primer cuartil de la base se observa una edad de 27 años, en el tercer cuartil 45 años, y la mediana de datos es de 34 años y la media es de 36 años. La moda de los datos es de 24 años. A continuación se presenta una gráfica de barras que permite observar la distribución de la edad a lo largo de la muestra, donde se identifica que, en general, se cuenta con una población relativamente joven.
 
+```{r age_description, echo=FALSE}
 # Ahora haremos un diagrama de barras 
 # Crearemos un data frame con los datos de edad
 datos_edad <- data.frame(Edad)
@@ -180,15 +218,22 @@ bar_chart <- ggplot(datos_edad, aes(x = Edad)) +
 
 # Que nos muestre el diagrama de barras
 print(bar_chart)
-summary(Edad)
 ```
+
+## Ocupación
 
 ```{r ocup_description, echo=FALSE}
 # (4) Descripción de la variable de ocupación
 ocu<- DGEIH$ocu
+summary(ocu)
 ocup_clas <- class(ocu)          #Aquí vemos la clase y nos dice que es categórica (factor)
 ocup_clas <- levels(ocu)         #Como es categórica y tiene nivel 0 y 1         
 
+```
+
+
+```{r ocup_description, echo=FALSE}
+# (4) Descripción de la variable de ocupación
 #Creamos un data frame con los datos de ocupación
 datos_ocu <- data.frame(
   Categoría = c("Ocupadas", "No Ocupadas"),
