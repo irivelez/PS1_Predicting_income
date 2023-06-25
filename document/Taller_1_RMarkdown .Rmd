@@ -414,6 +414,31 @@ plot(pressure)
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 
+## Perfil de Salario y Edad
+De acuerdo a la forma específica funcional establecida para el perfil de edad-salario, presentada a continuación: 
+$$
+log⁡(w)= β_1+β_2 Age+β_3Age^2+u
+$$
+
+Se detalla que se escogió la variable edad y edad elevado al cuadrado, precisamente porque de acuerdo a la teoría de la economía laboral, se ha observado empíricamente que la relación entre el salario y la edad de los trabajadores sigue una tendencia en forma de “pico de edad”, perseguido por un decrecimiento en el mediano/largo plazo. 
+
+Esto, considerando que los trabajadores adquieren experiencia y habilidades a lo largo de su vida laboral, su productividad tiende a aumentar, lo que se refleja a través de mejores y más altos salarios. Esto, nos introduce al concepto de “pico de edad”, en el que los trabajadores alcanzan su punto máximo de productividad y, por tanto obtienen salarios más altos. 
+
+Sin embargo, a medida que los trabajadores envejecen, de acuerdo al ciclo de la vida, empiezan a enfrentar desventajas relacionadas con la obsolescencia en habilidades, menor capacidad física y adaptabilidad, entre otras, que en últimas se traduce en niveles decrecientes de productividad. 
+
+En ese sentido, para capturar esta relación no lineal entre la edad y el salario, naturalmente en los modelos de regresión se utiliza una forma funcional en la que la edad se eleva al cuadrado, permitiendo capturar el crecimiento inicial y su posterior decrecimiento. 
+
+A continuación se presentan los coeficientes de la salida de regresión y su interpretación:
+```{ r, echo=FALSE}
+regresion_salario_edad <- lm (log_salarioreal~age +age_cuadradofinal,geih_filtered)
+stargazer(regresion_salario_edad,type="text")
+
+```
+
+
+
+
+
 # Notas
 Sustentar todas las medidas que salgan en las regresiones
 Exportar salidas de regresión con stargazer
