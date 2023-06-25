@@ -137,9 +137,6 @@ points(geih_filtered$age, y_estimados_gendergap, pch = 16, col = "green")
 length(y_estimados_gendergap)
 
 
-
-
-
 ## Discusión Peak Age, comparar con el punto anterior
 ## Poner lindo los coef de todo (bootstrap)
 
