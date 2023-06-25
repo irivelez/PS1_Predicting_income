@@ -5,7 +5,7 @@ date: "2023-06-21"
 output: word_document
 ---
 ```{r setup, include=FALSE}
-rm(list = ls())
+
 # install pacman
 if(!require(pacman)) install.packages("pacman") ; require(pacman)
 
@@ -17,7 +17,12 @@ p_load(rio,
        caret,
        rstudioapi,
        rvest,
-       ggplot2) 
+       ggplot2,
+       stargazer, 
+       broom, 
+       flextable, 
+       officer,
+       boot)
 ```
 
 ```{r path, include=FALSE}
@@ -137,7 +142,6 @@ Para importar los datos, es importante conocer qué tipo de página web contiene
 # Descripción de los datos
 ## Descripción general
 
-Aquí va el texto
 ```{r general_description, echo=FALSE}
 # Aquí hacemos la clasificación de variables
 exp <- floor(c(geih_filtered$p6426/12)) #Ponemos anual la variable de experiencia
@@ -171,11 +175,9 @@ De manera general, se identifica que nuestra base de datos está compuesta por 9
 ```{r age_description_1, echo=FALSE}
 # (1) Descripción general de la base
 dimen_dgeih <- dim(geih_filtered)  #Número de filas y columnas
-dimen_dgeih
+
 # Obtener los nombres de las variables
-nombres_variables <- names(geih_filtered)
-# Imprimir los nombres de las variables
-print(nombres_variables)
+nombres_variables <- names(DGEIH)
 ```
 
 Dicho lo anterior, a continuación se procede a realizar una descripción más amplia y gráfica de las variables que harán parte del modelo.
@@ -183,22 +185,24 @@ Dicho lo anterior, a continuación se procede a realizar una descripción más a
 =======
 ## Descripción edad
 =======
+La variable de edad es una variable con números enteros donde se observa un mínimo de 19 años, lo cual guarda sentido con la filtración inicial de los datos, donde se tuvo en cuenta únicamente a las personas mayores de 18 años, y en contraste se identifica un máximo de 86 años. En el primer cuartil de la base se observa una edad de 27 años, en el tercer cuartil una de 45 años. La mediana de los datos es de 34 años, la media es de 36 años y la moda es de 24 años. A continuación se presenta una gráfica de barras que permite observar la distribución de la edad a lo largo de la muestra, donde se identifica que, en general, se cuenta con una población relativamente joven.
 
 ```{r age_description_2, echo=FALSE}
 # (2) Descripción de la variable de edad
 Edad<- geih_filtered$age
 edad_clas <- class(Edad)        #Aquí vemos la clase que es de números enteros (integer)
-edad_clas
-summary(Edad)
+
 modeEdad <- function(Edad){
   return(as.numeric(names(which.max(table(Edad)))))
 }
 edad_mod <- modeEdad(Edad)      #La moda de la edad
-modeEdad(Edad)
-```
-La variable de edad es una variable con números enteros donde se observa un mínimo de 19 años, lo cual guarda sentido con la filtración inicial de los datos, donde se tuvo en cuenta únicamente a las personas mayores de 18 años, y en contraste se identifica un máximo de 86 años. En el primer cuartil de la base se observa una edad de 27 años, en el tercer cuartil una de 45 años. La mediana de los datos es de 34 años, la media es de 36 años y la moda es de 24 años. A continuación se presenta una gráfica de barras que permite observar la distribución de la edad a lo largo de la muestra, donde se identifica que, en general, se cuenta con una población relativamente joven.
 
-```{r age_description, echo=FALSE}
+# Estadísticas descriptivas con summary
+summary(Edad)
+edad_mod
+```
+
+```{r age_description_3, echo=FALSE}
 # Ahora haremos un diagrama de barras 
 # Crearemos un data frame con los datos de edad
 datos_edad <- data.frame(Edad)
@@ -227,7 +231,7 @@ print(bar_chart)
 
 La variable de ocupación es una dummy que toma el valor de "1" si la persona está ocupada y "0" si no lo está. Inicialmente en la base sin filtrar se tenía una distribución de ocupación con 16.277 personas ocupadas y 3.524 no ocupadas, como la que se observa a continuación:
 
-```{r ocup_description, echo=FALSE}
+```{r ocup_description_1, echo=FALSE}
 # (4) Descripción de la variable de ocupación
 #Creamos un data frame con los datos de ocupación
 datos_ocu <- data.frame(
@@ -251,24 +255,20 @@ pie_chart <- ggplot(datos_ocu, aes(x = "", y = Cantidad, fill = Categoría)) +
 print(pie_chart)
 ```
 
-
 Ahora bien, como resultado de la filtración inicial llevada a cabo, y siguiendo la instrucción impartida, la base de datos final únicamente se cuenta con personas mayores de 18 años ocupadas lo que da como resultado un total de 9.784 personas ocupadas.
 
-```{r ocup_description, echo=FALSE}
+```{r ocup_description_2, echo=FALSE}
 # (4) Descripción de la variable de ocupación
 ocu<- geih_filtered$ocu
-summary(ocu)
-length(ocu)
+leng_ocup <- length(ocu)
 ocup_clas <- class(ocu)          #Aquí vemos la clase y nos dice que es categórica (factor)
-ocup_clas
-ocup_clas <- levels(ocu)         #Como es categórica y tiene nivel 0 y 1         
-ocup_clas
+ocup_lev <- levels(ocu)         #Como es categórica y tiene nivel 0 y 1         
+table(ocu)
 ```
 
 ## Descripción educación
 
 La variable de educación es categórica y tiene la siguiente clasificación por categorías:
-
 
 1. Ninguno: Que corresponde a aquellas personas sin educación
 2 Preescolar: Que corresponde a aquellas personas que solamente terminaron preescolar
@@ -280,24 +280,23 @@ La variable de educación es categórica y tiene la siguiente clasificación por
 
 Dicho lo anterior, el análisis de esta variable muestra que la media y la mediana son personas que tienen educación universitaria, lo cual guarda sentido con que sean aquellas que han podido acceder al mercado laboral y encontrarse ocupadas.
 
-```{r educ_description, echo=FALSE}
-
+```{r educ_description_1, echo=FALSE}
 educ<- geih_filtered$maxEducLevel
-educ_cals <- class(educ)
-educ_cals
-summary(educ)
+educ_clas <- class(educ)
+
 modeEduc <- function(educ){
   return(as.numeric(names(which.max(table(educ)))))
 }
 mod_educ <- modeEduc(educ)      #La moda de la educación es 7 (terciary)
-mod_educ
+
+summary(educ)
+cat("La moda de la variable ocupación corresponde a la clasificación ",mod_educ)
 
 ```
 
 Lo anterior se puede constatar de manera visual en la siguiente gráfica de barras, donde se muestra la manera en que se encuentra distribuida la variable de educación, de acuerdo con la base de datos obtenida:
 
-
-```{r educ_description, echo=FALSE}
+```{r educ_description_2, echo=FALSE}
 
 # Creamos el data frame
 datos_educ <- data.frame(educ)
@@ -320,8 +319,6 @@ bar_chart <- ggplot(datos_educ, aes(x = as.factor(educ))) +
 
 # Hacemos que nos muestre el diagrama de barras
 print(bar_chart)
-summary(educ)
-table(educ)
 ```
 
 ## Descripción sexo
@@ -329,7 +326,6 @@ table(educ)
 La variable de género es dummy y toma el valor de 0 si la persona es mujer y toma el valor de 1 si es hombre. Los datos reflejan un total de 4.909 hombres y 4.875 mujeres, como se muestra en la siguiente gráfica de pie.
 
 ```{r sex_description, echo=FALSE}
-summary(geih_filtered$sex)
 sex<- geih_filtered$sex
 sex_clas <- class(sex)      #Aquí vemos la clase y nos dice que es integer, es una variable dummy
 sex_tabl <- table(sex)
@@ -351,26 +347,27 @@ pie_chart <- ggplot(datos_sex, aes(x = "", y = Cantidad, fill = Categoría)) +
 
 # Mostrar el diagrama de pie
 print(pie_chart)
-table(sex)
 ```
 
 ## Descripción de la experiencia
 
 La variable de experiencia es coninua e indica los meses que lleva trabajando la persona en su trabajo actual. La mediana y la moda de esta variable es de 24 meses, la media de 50 meses,  y el valor máximo es de 696 meses.
 
-```{r exp_description, echo=FALSE}
+```{r exp_description_1, echo=FALSE}
 expp <- geih_filtered$p6426
 expp<- geih_filtered$p6426
-class(expp)         #Aquí vemos la clase y nos dice que es numérica
-summary(expp)
+exp_clas <- class(expp)         #Aquí vemos la clase y nos dice que es numérica
+
 modeExp <- function(expp){
    return(as.numeric(names(which.max(table(expp)))))
  }
+summary(expp)
 modeExp(expp)       #Aquí vemos que la moda de la experiencia es de 0 años
 ```
+
 En virtud de lo anterior, el siguiente histograma refleja la distribución de la experiencia, donde se observa que la mayoría de observaciones se ubican entre 0 y 50 meses, lo cual guarda sentido con que los datos de media señalados previamente.
 
-```{r exp_description, echo=FALSE}
+```{r exp_description_2, echo=FALSE}
 # Generar el histograma
 histograma <- hist(geih_filtered$p6426, breaks = seq(0, 700, by = 50), col = "#2E75B6", border = "white",
                    xlab = "Experiencia (meses)", ylab = "Frecuencia", main = "Histograma de Experiencia")
@@ -378,44 +375,11 @@ histograma <- hist(geih_filtered$p6426, breaks = seq(0, 700, by = 50), col = "#2
 # Personalizar la apariencia del histograma
 par(las = 1)  # Orientación de etiquetas de ejes
 box()  # Agregar un marco alrededor del histograma
-
 ```
-
-
-## Age-wage profile
-
-A great deal of evidence in Labor economics suggests that the typical worker’s age-wage profile has a predictable path: “Wages tend to be low when the worker is young; they rise as the worker ages, peaking at about age 50; and the wage rate tends to remain stable or decline slightly after age 50”
-
-###  Estimate the Age-wage profile
-$$
-Log(w)=/beta_1+/beta_2Age+/beta_3Age^2+u
-$$
-
-
-
-
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
 
 ## Perfil de Salario y Edad
-De acuerdo a la forma específica funcional establecida para el perfil de edad-salario, presentada a continuación: 
+
+De acuerdo con la forma específicación funcional establecida para el perfil de edad-salario, presentada a continuación: 
 $$
 log⁡(w)= β_1+β_2 Age+β_3Age^2+u
 $$
@@ -429,14 +393,22 @@ Sin embargo, a medida que los trabajadores envejecen, de acuerdo al ciclo de la 
 En ese sentido, para capturar esta relación no lineal entre la edad y el salario, naturalmente en los modelos de regresión se utiliza una forma funcional en la que la edad se eleva al cuadrado, permitiendo capturar el crecimiento inicial y su posterior decrecimiento. 
 
 A continuación se presentan los coeficientes de la salida de regresión y su interpretación:
-```{ r, echo=FALSE}
-regresion_salario_edad <- lm (log_salarioreal~age +age_cuadradofinal,geih_filtered)
+
+```{r Reg_1_p3, echo=FALSE}
+# Modificación de variables
+geih_filtered$age_2 <- geih_filtered$age^2
+geih_filtered$log_salarioreal <-log(geih_filtered$y_salary_m_hu)
+
+# Modelo
+regresion_salario_edad <- lm (log_salarioreal~age +age_2,geih_filtered)
 stargazer(regresion_salario_edad,type="text")
 
 ```
+
 Si se obtienen los valores y estimados a través de la siguiente derivada: 
+
 $$
-Log(w)= 0.058age-0.00063〖age〗^2
+Log(w)= 0.058age-0.00063 age^2
 $$
 $$
 (∂Log(w))/∂age= 0.058 + (2)(-0.00063)age
@@ -451,8 +423,8 @@ Así por ejemplo, de manera matemática y manual, encontramos la edad pico, o el
 
 Graficando los valores estimados sobre la nube de puntos, obtenemos en efecto que la edad pico se podría determinar en los 46 años tal como se observa en la imagen presentada a continuación y luego, comienza a decrecer.
 
-```{ r, echo=FALSE}
-y_estimados <- predict(modelo_p3)
+```{r plot_p3, echo=FALSE}
+y_estimados <- predict(regresion_salario_edad)
 
 
 plot(geih_filtered$age, geih_filtered$log_salarioreal, 
@@ -463,22 +435,17 @@ plot(geih_filtered$age, geih_filtered$log_salarioreal,
 points(geih_filtered$age, y_estimados, pch = 16, col = "green")
 
 ```
+
 Ahora, bien los intervalos de confianza obtenidos por el método de Bootstrap representan un margen de error del 5% con el 95% de confianza los siguientes valores
 
-```{ r, echo=FALSE}
+```{r boostrap_p3, echo=FALSE}
 ##Boot 1
 eta_fn<-function(data,index){
-  coef(lm(log_salarioreal~age +age_cuadradofinal, data = data, subset = index))[2]}
-
-eta_fn(geih_filtered,1:nrow(geih_filtered))
-boot(geih_filtered, eta_fn, R = 1000)
+  coef(lm(log_salarioreal~age +age_2, data = data, subset = index))[2]}
 
 ##Boot 2
 eta_fn2<-function(data,index){
-  coef(lm(log_salarioreal~age +age_cuadradofinal, data = data, subset = index))[3]}
-
-eta_fn2(geih_filtered,1:nrow(geih_filtered))
-boot(geih_filtered, eta_fn2, R = 1000)
+  coef(lm(log_salarioreal~age +age_2, data = data, subset = index))[3]}
 
 ##Guardar resultados
 boot_results1 <- boot(geih_filtered, eta_fn, R = 1000)
@@ -487,18 +454,131 @@ boot_results2 <- boot(geih_filtered, eta_fn2, R = 1000)
 # Intervalos de confianza
 boot_ci1 <- boot.ci(boot_results1, type = "basic")  
 boot_ci2 <- boot.ci(boot_results2, type = "basic") 
-print(boot_ci1)
-print(boot_ci2)
 
-```
-
-```{ r, echo=FALSE}
+# tabla
 intervalodeconfianza_p3 <- data.frame(Variables = c("edad", "edad^2"),
-                                      `Intervalos de confianza` = c("(0.049, 0.0668)", "(-0.0007, -0.0005)"))
+                                      `Intervalos de confianza` = c("(0.0503, 0.0663)", "(-0.0007, -0.0005)"))
 intervalodeconfianza_p3
 ```
 
 Esto quiere decir, que por ejemplo, para la variable edad o en inglés “age”, el intervalo de confianza calculado es (0.0498,0.0669). Esto quiere decir que con un nivel de confianza del 95%, es posible afirmar que el coeficiente poblacional de la variable “edad”, se encuentra en ese intervalo. Es decir, esperamos que por cada unidad adicional de edad, el logaritmo del salario real aumente en un valor comprendido entre 0.0498 y 0.669, ceteris paribus. 
+
+## GAP en salario por género
+
+La brecha de género en el salario es una de las manifestaciones más evidentes de la desigualdad entre hombres y mujeres en el ámbito laboral. Para analizar este fenómeno, se realizarán dos modelos, el primero será la variable de salario contra la variable Female, en el segundo se añadrirán variables de control, tales como la edad, la educación y el total de horas trabajadas.
+
+$$
+log(w)= β_1+ β_2Female+Xcontrol+u
+$$
+En donde Female es una variable dummy con valor de 1 en caso de mujer y 0 en otro caso.
+
+A continuación podemos observar los resultados de las dos regresiones:
+
+```{r reg_fem, echo=FALSE}
+#Modificar los valores de la variable dummy para que 1=mujer
+geih_filtered$female <- ifelse(geih_filtered$sex == 1, 0, 1)
+
+# Variable educacion
+geih_filtered$educ <- factor(geih_filtered$maxEducLevel)
+
+reg_gendergap_1 <- lm(log_salarioreal~female, geih_filtered)
+reg_gendergap_3 <- lm(log_salarioreal~female+age+age_2+totalHoursWorked+educ,geih_filtered)
+
+stargazer(reg_gendergap_1,reg_gendergap_3,type="text")
+
+```
+
+Podemos observar que al realizar el modelo solo con la variable Female, la diferencia salarial entre los hombres y mujeres es de 4.7%; sin embargo, luego de añadir las variables de control, se evidencia que la diferencia salarial es aún más significativa, las mujeres ganan en promedio 18.1% menos que los hombres, manteniendo las demás variables constantes, en ambos casos, el coeficiente es significativo al 99% de confianza.
+
+Tambien podemos evidenciar que las variables de control edad, edad^2 y Horas trabajadas son significativas al 99% de confianza, con valores respectivos de 6.1%, -0.1% y -1%. Los dos primeros coeficientes muestran que la edad es un factor fundamental en el momento de definir el salario y, como en el punto anterior, llega un punto en el que más edad impacta de manera negativa el salario. El coeficiente relacionado con horas trabajadas, muestra que el incremento en horas trabajadas no necesariamente impacta de forma positiva el salario, lo cual puede estar ocasionado porque los individuos con menores salarios deben trabajar más tiempo para sostener sus gastos básicos.
+
+Ahora, se procederá a realizar el mismo modelo con el método FWL, a continuación se muestra una tabla en donde la primera columna corresponde al resultado de FWL y la segunda columna es el resultado de la regresión anterior.
+
+```{r reg_boostrap_p4, echo=FALSE}
+## Modelo FWL ----
+# Regress female on Xcontrols
+reg_gendergap_step_1 <- lm(female~age+age_2+totalHoursWorked+educ,geih_filtered)
+geih_filtered<-geih_filtered %>% mutate(female_resid=reg_gendergap_step_1$residuals) #Residuals 
+
+# Regress ln(w) on Xcontrols
+reg_gendergap_step_2 <- lm(log_salarioreal~age+age_2+totalHoursWorked+educ,geih_filtered)
+geih_filtered<-geih_filtered %>% mutate(lnw_resid=reg_gendergap_step_2$residuals) #Residuals 
+
+# Regress the residuals from step 2 on the residuals from step 1
+reg_gendergap_step_3<-lm(lnw_resid~female_resid,data=geih_filtered)
+
+stargazer(reg_gendergap_step_3,reg_gendergap_3,type="text")
+```
+Se identifica que luego de realizar el método, el coeficiente de la regresión salida de los resuduales con el método FWL es el mismo que el modelo realizado anteriormente.
+
+Luego de esto, se procede a realizar el modelo FWL con boostrap:
+
+```{r FWL_Boostrap, echo=FALSE}
+# Bootstrap para reg_gendergap_step_3
+eta_fn3 <- function(data, index) {
+  regress_step_1 <- lm(female ~ age + age_2 + totalHoursWorked + educ, data = data, subset = index)
+  residuals_step_1 <- regress_step_1$residuals
+  
+  regress_step_2 <- lm(log_salarioreal ~ age + age_2 + totalHoursWorked + educ, data = data, subset = index)
+  residuals_step_2 <- regress_step_2$residuals
+  
+  data_step_3 <- data[index, ]  # Subconjunto de datos para el paso 3
+  
+  # Agregar residuos al conjunto de datos para el paso 3
+  data_step_3$female_resid <- residuals_step_1
+  data_step_3$lnw_resid <- residuals_step_2
+  
+  regress_step_3 <- lm(lnw_resid ~ female_resid, data = data_step_3)
+  
+  coef(regress_step_3)
+}
+
+boot_results3 <- boot(geih_filtered, eta_fn3, R = 1000)
+boot_results3
+```
+En este caso, también podemos evidenciar que las mujeres ganan 18.1% menos que los hombres, manteniendo las demás variables constantes; además, estos resultados son robustos a la heterocedasticidad. Para completar el análisis, a continuación se presente el Mean Squared Error (MSE) de los tres modelos realizados:
+
+```{r MSE_Female, echo=FALSE}
+# MES ----
+# Calcular el MSE para reg_gendergap_3 (Modelo long)
+mse_reg_3 <- mean(reg_gendergap_3$residuals^2)
+
+# Calcular el MSE para reg_gendergap_step_3 (Modelo FWL)
+mse_step_3 <- mean(reg_gendergap_step_3$residuals^2)
+
+# Calcular el MSE promedio del bootstrap para reg_gendergap_step_3 (Modelo FWL con Boostrap)
+mse_boot_step_3 <- mean(boot_results3$t^2)
+
+## Tabla
+mse_table_p3 <- data.frame(Modelo = c( "Modelo long","Modelo FWL", "Modelo FWL con Boostrap"),
+                        MSE = c(mse_reg_3,mse_step_3, mse_boot_step_3))
+
+# Asignar nombres a las columnas
+names(mse_table_p3) <- c("Modelo", "MSE")
+
+# Imprimir la tabla
+print(mse_table_p3)
+```
+La tabla anterior muestra que el modelo FWL con Boostrap presenta un mejor ajuste en los datos que en los casos del modelo principal (Modelo long) y el Modelo FWL, lo cual es consistente con la teoría.
+
+Por último, a continuación se muestra la tabla de los valores estimados del modelo:
+
+```{r gaf_female, echo=FALSE}
+# Obtener los valores ajustados 
+y_estimados_gendergap <- predict(reg_gendergap_3)
+
+# Crear un gráfico de dispersión
+plot(geih_filtered$age, geih_filtered$log_salarioreal, 
+     xlab = "Edad", ylab = "Log Salario Real",
+     main = "Regresión de Salario Real en función de la Edad",
+     pch = 16, col = "blue")
+
+# Agregar los valores ajustados
+points(geih_filtered$age, y_estimados_gendergap, pch = 16, col = "green")
+```
+
+En este caso, se evidencia que los datos estimados parecen seguir el comportamiento de los valores reales y, similar a la gráfica en donde solo se tiene en cuenta la edad, se observa un crecimiento de los datos hasta mediados de los años 50, luego esto, se nota un leve decrecimiento en el salario.
+
 
 
 # Notas
