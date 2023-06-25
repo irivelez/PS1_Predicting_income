@@ -15,7 +15,8 @@ p_load(rio,
        skimr,
        caret,
        rstudioapi,
-       rvest) 
+       rvest,
+       ggplot2) 
 ```
 
 ```{r path, include=FALSE}
@@ -131,23 +132,223 @@ donde w representa el salario por hora y X es una matriz de potenciales variable
 
 Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, por lo que es pertinente identificar el link principal del cual se realizará la extracción de la información; además, se apliará un código en bucle para que la extracción de la informacíon sea más eficiente.Por último, como fue indicado, se realiza un primer filtro para tener en cuenta únicamente los individuos mayores de 18 años.
 
+```{r description_1, include=FALSE}
+# Aquí hacemos la clasificación de variables
+exp <- floor(c(geih_filtered$p6426/12)) #Ponemos anual la variable de experiencia
+DGEIH<-subset(geih_filtered, select = c( "y_salary_m_hu", "pet", "mes", "age", "sex","ocu", "oficio", "maxEducLevel","totalHoursWorked") ) 
 
-```{r limpiar_base, include=FALSE}
-# Filtro adultos
-Datos_18<- datos %>%  filter(age>18)
-summary(Datos_18$age)
+#Hacemos un subset con las variables a usar
+DGEIH<-cbind(DGEIH, exp) #Incluimos las variables calculadas que revisaremos
 
-# Primera columna
+DGEIH<- DGEIH[DGEIH$ingtot>0,]  # Revision del ingreso 
+summary(DGEIH)
+```
+
+```{r description_2, include=FALSE}
+# (1) Descripción general de la base
+dimen_dgeih <- dim(DGEIH)  #Número de filas y columnas
+
+# (2) Descripción de la variable de edad
+Edad<- DGEIH$age
+edad_clas <- class(Edad)         #Aquí vemos la clase y nos dice que es de números enteros (integer)
+edad_media <- mean(Edad)          #Edad media: nos dice que es 42.95
+edad_min <- min(Edad)           #Edad mínima: 19
+edad_max <- max(Edad)           #Edad máxima: 106 años
+modeEdad <- function(Edad){
+  return(as.numeric(names(which.max(table(Edad)))))
+}
+edad_mod <- modeEdad(Edad)      #La moda de la edad es 25 años
+
+# Ahora haremos un diagrama de barras 
+# Crearemos un data frame con los datos de edad
+datos_edad <- data.frame(Edad)
+
+# Crearemos el diagrama de barras
+bar_chart <- ggplot(datos_edad, aes(x = Edad)) +
+  geom_bar(fill = "#2E75B6", color = "white") +
+  labs(x = "Edad", y = "Frecuencia", title = "Distribución de Edad") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "none")
+
+# Que nos muestre el diagrama de barras
+print(bar_chart)
+summary(Edad)
+```
+
+```{r description_3, include=FALSE}
+# (4) Descripción de la variable de ocupación
+ocu<- DGEIH$ocu
+ocup_clas <- class(ocu)          #Aquí vemos la clase y nos dice que es categórica (factor)
+ocup_clas <- levels(ocu)         #Como es categórica y tiene nivel 0 y 1         
+
+#Creamos un data frame con los datos de ocupación
+datos_ocu <- data.frame(
+  Categoría = c("Ocupadas", "No Ocupadas"),
+  Cantidad = c(16277, 3524)
+)
+
+#Calculamos los porcentajes
+datos_ocu$Porcentaje <- round(datos_ocu$Cantidad / sum(datos_ocu$Cantidad) * 100, 1)
+
+#Creamos el diagrama de pie
+pie_chart <- ggplot(datos_ocu, aes(x = "", y = Cantidad, fill = Categoría)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  theme_void() +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom",
+        plot.margin = margin(0, 0, 0, 0)) +
+  geom_text(aes(label = paste0(Categoría, "\n", Porcentaje, "%")), 
+            position = position_stack(vjust = 0.5), size = 3, color = "white")
+
+#Que nos muestre el diagrama de pie
+print(pie_chart)
+summary(ocu)  
+```
+
+```{r description_4, include=FALSE}
+# (5) Descripción de la variable de educación
+
+# Datos en la variable:
+#1 "None"
+#2 "preschool"
+#3 "primary incomplete (1-4)"
+#4 "primary complete (5)"
+#5 "secondary incomplete (6-10)"
+#6 "secondary complete (11)"
+#7 "terciary"
+#9 "N/A";
+
+educ<- DGEIH$maxEducLevel
+educ_cals <- class(educ)  #Nos dice que es de números enteros (integer)
+modeEduc <- function(educ){
+  return(as.numeric(names(which.max(table(educ)))))
+}
+mod_educ <- modeEduc(educ)      #La moda de la educación es 7 (terciary)
+
+## Ahora vamos a hacer una gráfica de barras que refleje la cantidad de personas que tienen cada nivel de educación
+## Se utilizarán abreviaturas de las siguiente manera:
+#1 "None"                         = "none
+#2 "preschool"                    = "pre"
+#3 "primary incomplete (1-4)"     = "pri_in"
+#4 "primary complete (5)"         = "pri_com"
+#5 "secondary incomplete (6-10)"  = "sec_in"
+#6 "secondary complete (11)"      = "sec_com"
+#7 "terciary"                     = "ter"
+#9 "N/A";                         = "N/A"... aunque no hay en la base ya limpia
+
+# Creamos el data frame
+datos_educ <- data.frame(educ)
+
+# Creamos el diagrama de barras con etiquetas de datos y demás
+bar_chart <- ggplot(datos_educ, aes(x = as.factor(educ))) +
+  geom_bar(fill = "#2E75B6", color = "white") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -0.5, size = 3, color = 'black') +  # Agregar etiquetas de datos
+  labs(x = "Educ", y = "Frecuencia", title = "Distribución de Educación") +
+  scale_x_discrete(labels = c("Ninguno", "Preescolar", "Basc_prim", "Basc_secund", "Media", "Universitaria", "No_informa")) +  # Cambiar las categorías del eje x
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 8),
+        axis.line.y = element_blank(),  # Eliminar el eje vertical izquierdo
+        axis.ticks.y = element_blank(),  # Eliminar los ticks del eje vertical izquierdo
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "none")
+
+# Hacemos que nos muestre el diagrama de barras
+print(bar_chart)
+summary(educ)
+table(educ)
+```
+
+```{r description_5, include=FALSE}
+# (6) Descripción de la variable de género
+sex<- DGEIH$sex
+class(sex)          #Aquí vemos la clase y nos dice que es categórica (factor)
+levels(sex)         #Como es categórica y tiene nivel 0 y 1         
+summary(sex)        #10.047 son hombres (1) y 9.754 son mujeres (0)... tener en cuenta si esto cambia
+
+# Haremos un pie 
+
+# Creamos un data frame con los datos de sexo
+datos_sex <- data.frame(
+  Categoría = c("Hombres", "Mujeres"),
+  Cantidad = c(10.047, 9.754)
+)
+
+# Crear el diagrama de pie con etiquetas de datos
+pie_chart <- ggplot(datos_sex, aes(x = "", y = Cantidad, fill = Categoría)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  geom_text(aes(label = Cantidad), position = position_stack(vjust = 0.5), size = 4) +  # Etiquetas de datos en valores enteros
+  coord_polar("y", start = 0) +
+  labs(title = "Distribución por género") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        legend.position = "right")
+
+# Mostrar el diagrama de pie
+print(pie_chart)
+```
 
 
-# Columna Bogota
+```{r description_5, include=FALSE}
+# (7) Descripción de la variable de experiencia
+expp<- DGEIH$exp
+View(expp)
+class(expp)         #Aquí vemos la clase y nos dice que es numérica
+mean(expp)          #Aquí vemos la experiencia media y vemos es de 4.2 años
+min(expp)           #Aquí vemos la experiencia mínima y vemos que como era de esperar es de 0 años
+max(expp)           #Aquí vemos la experiencia máxima y vemos que es de 60 años
+modeExp <- function(expp){
+  return(as.numeric(names(which.max(table(expp)))))
+}
+modeExp(expp)       #Aquí vemos que la moda de la experiencia es de 0 años
 
-#
+
+
+###########
+
+# Crear el data frame
+datos_exp <- data.frame(expp)
+
+# Crear el histograma
+histograma <- ggplot(datos_exp, aes(x = expp)) +
+  geom_histogram(binwidth = 1, fill = "#2E75B6", color = "white") +
+  labs(x = "Experiencia", y = "Frecuencia", title = "Histograma de Experiencia") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12))
+
+# Mostrar el histograma
+print(histograma)
 
 
 
-# Filtro Omitir NA
+###########
 
+
+plot(hist(expp))
+
+
+
+# (8) Descripción de la variable de oficio
+library(modeest)
+Oficio_<- DGEIH$oficio
+class(Oficio_)
+levels(Oficio_)
+summary(Oficio_)
+table(Oficio_)
+barplot(table((Oficio_)))
+mlv(Oficio_, method = "mfv")
 
 
 
