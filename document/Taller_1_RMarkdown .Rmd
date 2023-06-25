@@ -356,7 +356,7 @@ table(sex)
 
 ## Descripción de la experiencia
 
-La variable de experiencia es coninua e indica los meses que lleva trabajando la persona en su trabajo actual. La mediana y la moda de esta variable es de 24 meses, la media de 50 meses,  y el valor máximo es de 696 meses.
+La variable de experiencia es continua e indica los meses que lleva trabajando la persona en su trabajo actual. La mediana y la moda de esta variable es de 24 meses, la media de 50 meses,  y el valor máximo es de 696 meses.
 
 ```{r exp_description, echo=FALSE}
 expp <- geih_filtered$p6426
@@ -366,7 +366,7 @@ summary(expp)
 modeExp <- function(expp){
    return(as.numeric(names(which.max(table(expp)))))
  }
-modeExp(expp)       #Aquí vemos que la moda de la experiencia es de 0 años
+modeExp(expp)       #Que me muestre la moda
 ```
 En virtud de lo anterior, el siguiente histograma refleja la distribución de la experiencia, donde se observa que la mayoría de observaciones se ubican entre 0 y 50 meses, lo cual guarda sentido con que los datos de media señalados previamente.
 
