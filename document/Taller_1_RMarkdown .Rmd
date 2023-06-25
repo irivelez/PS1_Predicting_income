@@ -19,7 +19,7 @@ p_load(rio,
        rvest,
        ggplot2) 
 ```
->az
+
 ```{r path, include=FALSE}
 rm(list=ls())
 getwd()
@@ -168,7 +168,7 @@ De manera general, se identifica que nuestra base de datos está compuesta por 9
 - (totalHoursWorked): Indica el total de horas trabajadas en el último mes
 - (exp): Hace referencia a la experiencia en años que tiene la persona
 
-```{r age_description, echo=FALSE}
+```{r age_description_1, echo=FALSE}
 # (1) Descripción general de la base
 dimen_dgeih <- dim(geih_filtered)  #Número de filas y columnas
 dimen_dgeih
@@ -184,7 +184,7 @@ Dicho lo anterior, a continuación se procede a realizar una descripción más a
 ## Descripción edad
 =======
 
-```{r age_description, echo=FALSE}
+```{r age_description_2, echo=FALSE}
 # (2) Descripción de la variable de edad
 Edad<- geih_filtered$age
 edad_clas <- class(Edad)        #Aquí vemos la clase que es de números enteros (integer)
