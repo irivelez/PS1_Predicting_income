@@ -5,6 +5,7 @@ date: "2023-06-21"
 output: word_document
 ---
 ```{r setup, include=FALSE}
+rm(list = ls())
 # install pacman
 if(!require(pacman)) install.packages("pacman") ; require(pacman)
 
@@ -114,6 +115,7 @@ save(geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_i
 
 ```{r Import_DB, include=FALSE}
 load("../stores/data.Rdata")
+geih_filtered <- geih_filtered[complete.cases(geih_filtered$maxEducLevel), ]
 ```
 
 # Taller 1
@@ -132,19 +134,18 @@ donde w representa el salario por hora y X es una matriz de potenciales variable
 
 Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, por lo que es pertinente identificar el link principal del cual se realizará la extracción de la información; además, se apliará un código en bucle para que la extracción de la informacíon sea más eficiente.Por último, como fue indicado, se realiza un primer filtro para tener en cuenta únicamente los individuos mayores de 18 años.
 
-```{r description_1, include=FALSE}
+```{r general_description, echo=FALSE}
 # Aquí hacemos la clasificación de variables
 exp <- floor(c(geih_filtered$p6426/12)) #Ponemos anual la variable de experiencia
-DGEIH<-subset(geih_filtered, select = c( "y_salary_m_hu", "pet", "mes", "age", "sex","ocu", "oficio", "maxEducLevel","totalHoursWorked") ) 
+DGEIH<-subset(geih_filtered, select = c( "y_salary_m_hu", "pet", "mes", "age", "sex","ocu", "oficio", "maxEducLevel","totalHoursWorked")) 
 
 #Hacemos un subset con las variables a usar
 DGEIH<-cbind(DGEIH, exp) #Incluimos las variables calculadas que revisaremos
 
-DGEIH<- DGEIH[DGEIH$ingtot>0,]  # Revision del ingreso 
 summary(DGEIH)
 ```
 
-```{r description_2, include=FALSE}
+```{r age_description, echo=FALSE}
 # (1) Descripción general de la base
 dimen_dgeih <- dim(DGEIH)  #Número de filas y columnas
 
@@ -182,7 +183,7 @@ print(bar_chart)
 summary(Edad)
 ```
 
-```{r description_3, include=FALSE}
+```{r ocup_description, echo=FALSE}
 # (4) Descripción de la variable de ocupación
 ocu<- DGEIH$ocu
 ocup_clas <- class(ocu)          #Aquí vemos la clase y nos dice que es categórica (factor)
@@ -213,18 +214,18 @@ print(pie_chart)
 summary(ocu)  
 ```
 
-```{r description_4, include=FALSE}
+```{r educ_description, echo=FALSE}
 # (5) Descripción de la variable de educación
 
 # Datos en la variable:
-#1 "None"
-#2 "preschool"
-#3 "primary incomplete (1-4)"
-#4 "primary complete (5)"
-#5 "secondary incomplete (6-10)"
-#6 "secondary complete (11)"
-#7 "terciary"
-#9 "N/A";
+#1 Ninguno
+#2 Preescolar
+#3 Basica primaria (1o - 5o)
+#4 Basica secundaria (60 - 9o)
+#5 Media (10o -13o)
+#6 Superior - Universitaria
+#7 No sabe, No informa
+
 
 educ<- DGEIH$maxEducLevel
 educ_cals <- class(educ)  #Nos dice que es de números enteros (integer)
@@ -269,19 +270,21 @@ summary(educ)
 table(educ)
 ```
 
-```{r description_5, include=FALSE}
+```{r sex_description, echo=FALSE}
+# (5) Descripción de la variable de sex
+
+# Datos en la variable:
+#0 Mujer
+#1 Hombre
+
 # (6) Descripción de la variable de género
 sex<- DGEIH$sex
-class(sex)          #Aquí vemos la clase y nos dice que es categórica (factor)
-levels(sex)         #Como es categórica y tiene nivel 0 y 1         
-summary(sex)        #10.047 son hombres (1) y 9.754 son mujeres (0)... tener en cuenta si esto cambia
-
-# Haremos un pie 
-
+sex_clas <- class(sex)      #Aquí vemos la clase y nos dice que es integer, es una variable dummy
+sex_tabl <- table(sex)
 # Creamos un data frame con los datos de sexo
 datos_sex <- data.frame(
   Categoría = c("Hombres", "Mujeres"),
-  Cantidad = c(10.047, 9.754)
+  Cantidad = c(4910, 4874)
 )
 
 # Crear el diagrama de pie con etiquetas de datos
@@ -296,100 +299,66 @@ pie_chart <- ggplot(datos_sex, aes(x = "", y = Cantidad, fill = Categoría)) +
 
 # Mostrar el diagrama de pie
 print(pie_chart)
+table(sex)
+summary(sex)        #10.047 son hombres (1) y 9.754 son mujeres (0)... tener en cuenta si esto 
 ```
 
+```{r description_5}
+# # (7) Descripción de la variable de experiencia
+# expp<- DGEIH$exp
+# View(expp)
+# class(expp)         #Aquí vemos la clase y nos dice que es numérica
+# mean(expp)          #Aquí vemos la experiencia media y vemos es de 4.2 años
+# min(expp)           #Aquí vemos la experiencia mínima y vemos que como era de esperar es de 0 años
+# max(expp)           #Aquí vemos la experiencia máxima y vemos que es de 60 años
+# modeExp <- function(expp){
+#   return(as.numeric(names(which.max(table(expp)))))
+# }
+# modeExp(expp)       #Aquí vemos que la moda de la experiencia es de 0 años
+# 
+# 
+# 
+# ###########
+# 
+# # Crear el data frame
+# datos_exp <- data.frame(expp)
+# 
+# # Crear el histograma
+# histograma <- ggplot(datos_exp, aes(x = expp)) +
+#   geom_histogram(binwidth = 1, fill = "#2E75B6", color = "white") +
+#   labs(x = "Experiencia", y = "Frecuencia", title = "Histograma de Experiencia") +
+#   theme_minimal() +
+#   theme(plot.title = element_text(size = 16, face = "bold"),
+#         axis.title = element_text(size = 14),
+#         axis.text = element_text(size = 12))
+# 
+# # Mostrar el histograma
+# print(histograma)
+# 
+# 
+# 
+# ###########
+# 
+# 
+# plot(hist(expp))
+# 
+# 
+# 
+# # (8) Descripción de la variable de oficio
+# library(modeest)
+# Oficio_<- DGEIH$oficio
+# class(Oficio_)
+# levels(Oficio_)
+# summary(Oficio_)
+# table(Oficio_)
+# barplot(table((Oficio_)))
+# mlv(Oficio_, method = "mfv")
+# 
 
-```{r description_5, include=FALSE}
-# (7) Descripción de la variable de experiencia
-expp<- DGEIH$exp
-View(expp)
-class(expp)         #Aquí vemos la clase y nos dice que es numérica
-mean(expp)          #Aquí vemos la experiencia media y vemos es de 4.2 años
-min(expp)           #Aquí vemos la experiencia mínima y vemos que como era de esperar es de 0 años
-max(expp)           #Aquí vemos la experiencia máxima y vemos que es de 60 años
-modeExp <- function(expp){
-  return(as.numeric(names(which.max(table(expp)))))
-}
-modeExp(expp)       #Aquí vemos que la moda de la experiencia es de 0 años
-
-
-
-###########
-
-# Crear el data frame
-datos_exp <- data.frame(expp)
-
-# Crear el histograma
-histograma <- ggplot(datos_exp, aes(x = expp)) +
-  geom_histogram(binwidth = 1, fill = "#2E75B6", color = "white") +
-  labs(x = "Experiencia", y = "Frecuencia", title = "Histograma de Experiencia") +
-  theme_minimal() +
-  theme(plot.title = element_text(size = 16, face = "bold"),
-        axis.title = element_text(size = 14),
-        axis.text = element_text(size = 12))
-
-# Mostrar el histograma
-print(histograma)
-
-
-
-###########
-
-
-plot(hist(expp))
-
-
-
-# (8) Descripción de la variable de oficio
-library(modeest)
-Oficio_<- DGEIH$oficio
-class(Oficio_)
-levels(Oficio_)
-summary(Oficio_)
-table(Oficio_)
-barplot(table((Oficio_)))
-mlv(Oficio_, method = "mfv")
-
-
-
-```
-
-
-### GEIH Descr_iption
-```{r GEIH}
-
-summary(Datos_18$mes)
-
-```
-
-### Process of acquiring the data
-
-
-
-### Data cleaning process
-
-```{r Transformation, include=FALSE}
-# 1. Only on employed individuals older than 18 years old
-# 2. Observations with missing data or 0 wages
 
 ```
 
 
-### Descriptive Analysis
-
-```{r Descriptive}
-
-
- 
-
-## Tables
-
-## Deeper Analysis
-
-## Justification for the data choices
-
-
-```
 
 ## Age-wage profile
 
