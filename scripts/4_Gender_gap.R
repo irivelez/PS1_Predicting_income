@@ -92,16 +92,14 @@ boot_ci3
 # MES ----
 # Calcular el MSE para reg_gendergap_3 (Modelo long)
 mse_reg_3 <- mean(reg_gendergap_3$residuals^2)
-mse_reg_3
 
 # Calcular el MSE para reg_gendergap_step_3 (Modelo FWL)
 mse_step_3 <- mean(reg_gendergap_step_3$residuals^2)
-mse_step_3
 
 # Calcular el MSE promedio del bootstrap para reg_gendergap_step_3 (Modelo FWL con Boostrap)
 mse_boot_step_3 <- mean(boot_results3$t^2)
 
-# Tabla
+## Tabla
 mse_table_p3 <- data.frame(Modelo = c( "Modelo long","Modelo FW", "Modelo FWL con Boostrap"),
                         MSE = c(mse_reg_3,mse_step_3, mse_boot_step_3))
 
@@ -111,12 +109,39 @@ names(mse_table_p3) <- c("Modelo", "MSE")
 # Imprimir la tabla
 print(mse_table)
 
+# Plot ----
+# Verificar si hay filas con valores faltantes
+length(y_estimados)
+length(db_geih_filtered$age)
+sum(!is.na(db_geih_filtered$age))
+
+missing_data <- complete.cases(db_geih_filtered$age, db_geih_filtered$log_salarioreal)
+
+# Eliminar filas con valores faltantes
+db_geih_filtered <- db_geih_filtered[missing_data, ]
+
+# Ajustar el modelo de regresión
+modelo_p3 <- lm(log_salarioreal ~ age + age_cuadradofinal, data = db_geih_filtered)
+
+# Obtener los valores ajustados 
+y_estimados_gendergap <- predict(reg_gendergap_3)
+
+# Crear un gráfico de dispersión
+plot(geih_filtered$age, geih_filtered$log_salarioreal, 
+     xlab = "Edad", ylab = "Log Salario Real",
+     main = "Regresión de Salario Real en función de la Edad",
+     pch = 16, col = "blue")
+
+# Agregar los valores ajustados
+points(geih_filtered$age, y_estimados_gendergap, pch = 16, col = "green")
+length(y_estimados_gendergap)
+
 
 
 
 
 ## Discusión Peak Age, comparar con el punto anterior
-
+## Poner lindo los coef de todo (bootstrap)
 
 
 
