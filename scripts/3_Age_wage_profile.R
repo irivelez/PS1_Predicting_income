@@ -15,7 +15,7 @@ getwd()
 setwd("/Users/luciafillippo/Library/CloudStorage/OneDrive-UniversidaddelosAndes/Big Data & Machine Learning/Problem Sets/Problem Set I/V.F Repositorio/Problem Set 1/stores")
 
 # Data base load
-load("data.Rdata"
+load("data.Rdata")
 glimpse("data.Rdata")
 
 #Crear variable edad al cuadrado
