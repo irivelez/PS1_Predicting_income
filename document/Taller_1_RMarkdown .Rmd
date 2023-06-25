@@ -434,9 +434,71 @@ regresion_salario_edad <- lm (log_salarioreal~age +age_cuadradofinal,geih_filter
 stargazer(regresion_salario_edad,type="text")
 
 ```
+Si se obtienen los valores y estimados a través de la siguiente derivada: 
+$$
+Log(w)= 0.058age-0.00063〖age〗^2
+$$
+$$
+(∂Log(w))/∂age= 0.058 + (2)(-0.00063)age
+$$
+$$
+(∂Log(w))/∂age= 0.058 + (0.00126)age
+$$
+$$
+0.058/0.00126=age=>46 
+$$
+Así por ejemplo, de manera matemática y manual, encontramos la edad pico, o el punto máximo de nuestro modelo de regresión considerando los estimadores obtenidos. 
+
+Graficando los valores estimados sobre la nube de puntos, obtenemos en efecto que la edad pico se podría determinar en los 46 años tal como se observa en la imagen presentada a continuación y luego, comienza a decrecer.
+
+```{ r, echo=FALSE}
+y_estimados <- predict(modelo_p3)
 
 
+plot(geih_filtered$age, geih_filtered$log_salarioreal, 
+     xlab = "Edad", ylab = "Log Salario Real",
+     main = "Regresión de Salario Real en función de la Edad",
+     pch = 16, col = "blue")
 
+points(geih_filtered$age, y_estimados, pch = 16, col = "green")
+
+```
+Ahora, bien los intervalos de confianza obtenidos por el método de Bootstrap representan un margen de error del 5% con el 95% de confianza los siguientes valores
+
+```{ r, echo=FALSE}
+##Boot 1
+eta_fn<-function(data,index){
+  coef(lm(log_salarioreal~age +age_cuadradofinal, data = data, subset = index))[2]}
+
+eta_fn(geih_filtered,1:nrow(geih_filtered))
+boot(geih_filtered, eta_fn, R = 1000)
+
+##Boot 2
+eta_fn2<-function(data,index){
+  coef(lm(log_salarioreal~age +age_cuadradofinal, data = data, subset = index))[3]}
+
+eta_fn2(geih_filtered,1:nrow(geih_filtered))
+boot(geih_filtered, eta_fn2, R = 1000)
+
+##Guardar resultados
+boot_results1 <- boot(geih_filtered, eta_fn, R = 1000)
+boot_results2 <- boot(geih_filtered, eta_fn2, R = 1000)
+
+# Intervalos de confianza
+boot_ci1 <- boot.ci(boot_results1, type = "basic")  
+boot_ci2 <- boot.ci(boot_results2, type = "basic") 
+print(boot_ci1)
+print(boot_ci2)
+
+```
+
+```{ r, echo=FALSE}
+intervalodeconfianza_p3 <- data.frame(Variables = c("edad", "edad^2"),
+                                      `Intervalos de confianza` = c("(0.049, 0.0668)", "(-0.0007, -0.0005)"))
+intervalodeconfianza_p3
+```
+
+Esto quiere decir, que por ejemplo, para la variable edad o en inglés “age”, el intervalo de confianza calculado es (0.0498,0.0669). Esto quiere decir que con un nivel de confianza del 95%, es posible afirmar que el coeficiente poblacional de la variable “edad”, se encuentra en ese intervalo. Es decir, esperamos que por cada unidad adicional de edad, el logaritmo del salario real aumente en un valor comprendido entre 0.0498 y 0.669, ceteris paribus. 
 
 
 # Notas
