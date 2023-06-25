@@ -19,7 +19,7 @@ p_load(rio,
        rvest,
        ggplot2) 
 ```
-
+>az
 ```{r path, include=FALSE}
 rm(list=ls())
 getwd()
@@ -120,19 +120,19 @@ geih_filtered <- geih_filtered[complete.cases(geih_filtered$maxEducLevel), ]
 
 # Taller 1
 
-El presente informe presenta la solución al Problem Set 1 de la clase Big Data & Machine Learning, en donde se aplicaron diversos conceptos y herramientas para la predicción de modelos, el manejo de bases de datos grandes, entre otros. El repositorio GitHub se encuentra este documento y el código R, en donde se generaron todos los resultados. Este repositorio se encuentra en el siguiente link: (link del Github con el código)
+El presente informe presenta la solución al Problem Set 1 de la clase Big Data & Machine Learning, con el objetivo de aplicar diversos conceptos y herramientas para la predicción de modelos, el manejo de bases de datos grandes, entre otros. Para el desarrollo del trabajo se utilizó el repositorio GitHub el cual contiene información de la Gran Encuesta Integrada de Hogares - GEIH para el año 2018 (luego en word ponemos este hiperbínculo https://ignaciomsarmiento.github.io/GEIH2018_sample/); además, se empleó el sotware Rstudio para el manejo de los datos, generación de resultados y desarrollo del taller, cuyo código se encuentra en el siguiente link: (link del Github con el código)
 
 ## 1. Introducción
 
-Conocer el valor de los ingresos de las personas es fundamental para el pago de impuestos y para identificar a los hogares que requieren apoyos sociales; no obstante, en algunas ocasiones estos valores no se conocen al no ser reportados, de manera que poder determinar su valor se convierte en un gran insumo para el desarrollo de políticas tributarias y sociales. Con objeto de lo anterior, el objetivo principal de este documento es construir un modelo predictivo de los salarios por hora de los individuos, a partir del siguiente modelo:
+El valor de ingresos de las personas es un insumo esencial para el desarrollo de políticas públicas, ya sea para identificar a los hogares que tienen la posibilidad de pagar más impuestos, así como para lograr una mejor focalización en aquellos hogares que requieren apoyos sociales; no obstante, en algunas ocasiones los ingresos de las personas no son reportados, de manera que esto se convierte en una barrera para el desarrollo de políticas públicas eficientes. En virtud de lo anterior, poder determinar el valor de los ingresos de las personas se convierte en un gran insumo para el desarrollo de políticas tributarias y sociales, razón por la cual el objetivo principal de este documento es construir un modelo predictivo de los salarios por hora de los individuos, a partir del siguiente modelo:
 
 $$
 w=f(X)+u
 $$
 
-donde w representa el salario por hora y X es una matriz de potenciales variables que explican el salario. Para la creación de este modelo se utilizarán datos de la Gran Encuesta Integrada de Hogares – GEIH del año 2018. 
+donde "w" representa el salario por hora y "X" es una matriz de potenciales variables que explican el salario. Como se mencionó previamente, para la creación de este modelo se utilizarán datos de la Gran Encuesta Integrada de Hogares – GEIH del año 2018. 
 
-Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, por lo que es pertinente identificar el link principal del cual se realizará la extracción de la información; además, se apliará un código en bucle para que la extracción de la informacíon sea más eficiente.Por último, como fue indicado, se realiza un primer filtro para tener en cuenta únicamente los individuos mayores de 18 años.
+Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, razón por la cual es pertinente identificar el link principal a partir del cual se realizará la extracción de la información. Para esto se aplicó un código en bucle para que la extracción de la informacíon de las distintas ventanas de la página web fuese más eficiente; además, se realizaron una serie de filtros a los datos, siguiendo las instrucciones dadas, con la finalidad de eliminar las variables "N/A" y considerar únicamente a los individuos mayores de 18 años.
 
 # Descripción de los datos
 ## Descripción general
@@ -147,26 +147,58 @@ DGEIH<-subset(geih_filtered, select = c( "y_salary_m_hu", "pet", "mes", "age", "
 DGEIH<-cbind(DGEIH, exp) #Incluimos las variables calculadas que revisaremos
 
 summary(DGEIH)
+
 ```
 
-## Descripción edad
+<<<<<<< HEAD
 
-Aquí va el texto
+## Análisis descriptivo
+=======
+
+De manera general, se identifica que nuestra base de datos está compuesta por 9.784 filas y por 151 columnas. Las variables que hacen parte de la base son: 
+
+- (y_salary_m_hu): Indica el salario mensual por hora de la persona
+- (pet): Indica si la persona hace parte de la Población en Edad de Trabajar - PET
+- (mes): Contiene el mes de referencia
+- (age): Contiene la edad de la persona
+- (sex): Contiene el sexo de la persona
+- (ocu): Señala si la persona es ocupada o no ocupada
+- (oficio): Indica el oficio de la persona
+- (maxEducLevel): Indicar el máximo nivel educativo alcanzado
+- (totalHoursWorked): Indica el total de horas trabajadas en el último mes
+- (exp): Hace referencia a la experiencia en años que tiene la persona
+
 ```{r age_description, echo=FALSE}
 # (1) Descripción general de la base
-dimen_dgeih <- dim(DGEIH)  #Número de filas y columnas
+dimen_dgeih <- dim(geih_filtered)  #Número de filas y columnas
+dimen_dgeih
+# Obtener los nombres de las variables
+nombres_variables <- names(geih_filtered)
+# Imprimir los nombres de las variables
+print(nombres_variables)
+```
 
+Dicho lo anterior, a continuación se procede a realizar una descripción más amplia y gráfica de las variables que harán parte del modelo.
+
+=======
+## Descripción edad
+=======
+
+```{r age_description, echo=FALSE}
 # (2) Descripción de la variable de edad
-Edad<- DGEIH$age
-edad_clas <- class(Edad)         #Aquí vemos la clase y nos dice que es de números enteros (integer)
-edad_media <- mean(Edad)          #Edad media: nos dice que es 42.95
-edad_min <- min(Edad)           #Edad mínima: 19
-edad_max <- max(Edad)           #Edad máxima: 106 años
+Edad<- geih_filtered$age
+edad_clas <- class(Edad)        #Aquí vemos la clase que es de números enteros (integer)
+edad_clas
+summary(Edad)
 modeEdad <- function(Edad){
   return(as.numeric(names(which.max(table(Edad)))))
 }
-edad_mod <- modeEdad(Edad)      #La moda de la edad es 25 años
+edad_mod <- modeEdad(Edad)      #La moda de la edad
+modeEdad(Edad)
+```
+La variable de edad es una variable con números enteros donde se observa un mínimo de 19 años, lo cual guarda sentido con la filtración inicial de los datos, donde se tuvo en cuenta únicamente a las personas mayores de 18 años, y en contraste se identifica un máximo de 86 años. En el primer cuartil de la base se observa una edad de 27 años, en el tercer cuartil una de 45 años. La mediana de los datos es de 34 años, la media es de 36 años y la moda es de 24 años. A continuación se presenta una gráfica de barras que permite observar la distribución de la edad a lo largo de la muestra, donde se identifica que, en general, se cuenta con una población relativamente joven.
 
+```{r age_description, echo=FALSE}
 # Ahora haremos un diagrama de barras 
 # Crearemos un data frame con los datos de edad
 datos_edad <- data.frame(Edad)
@@ -187,18 +219,16 @@ bar_chart <- ggplot(datos_edad, aes(x = Edad)) +
 
 # Que nos muestre el diagrama de barras
 print(bar_chart)
-summary(Edad)
 ```
 
+=======
 ## Descripción ocupación
+=======
 
-Aquí va el texto
+La variable de ocupación es una dummy que toma el valor de "1" si la persona está ocupada y "0" si no lo está. Inicialmente en la base sin filtrar se tenía una distribución de ocupación con 16.277 personas ocupadas y 3.524 no ocupadas, como la que se observa a continuación:
+
 ```{r ocup_description, echo=FALSE}
 # (4) Descripción de la variable de ocupación
-ocu<- DGEIH$ocu
-ocup_clas <- class(ocu)          #Aquí vemos la clase y nos dice que es categórica (factor)
-ocup_clas <- levels(ocu)         #Como es categórica y tiene nivel 0 y 1         
-
 #Creamos un data frame con los datos de ocupación
 datos_ocu <- data.frame(
   Categoría = c("Ocupadas", "No Ocupadas"),
@@ -218,45 +248,56 @@ pie_chart <- ggplot(datos_ocu, aes(x = "", y = Cantidad, fill = Categoría)) +
         plot.margin = margin(0, 0, 0, 0)) +
   geom_text(aes(label = paste0(Categoría, "\n", Porcentaje, "%")), 
             position = position_stack(vjust = 0.5), size = 3, color = "white")
-
-#Que nos muestre el diagrama de pie
 print(pie_chart)
-summary(ocu)  
+```
+
+
+Ahora bien, como resultado de la filtración inicial llevada a cabo, y siguiendo la instrucción impartida, la base de datos final únicamente se cuenta con personas mayores de 18 años ocupadas lo que da como resultado un total de 9.784 personas ocupadas.
+
+```{r ocup_description, echo=FALSE}
+# (4) Descripción de la variable de ocupación
+ocu<- geih_filtered$ocu
+summary(ocu)
+length(ocu)
+ocup_clas <- class(ocu)          #Aquí vemos la clase y nos dice que es categórica (factor)
+ocup_clas
+ocup_clas <- levels(ocu)         #Como es categórica y tiene nivel 0 y 1         
+ocup_clas
 ```
 
 ## Descripción educación
 
-Aquí va el texto
+La variable de educación es categórica y tiene la siguiente clasificación por categorías:
+
+
+1. Ninguno: Que corresponde a aquellas personas sin educación
+2 Preescolar: Que corresponde a aquellas personas que solamente terminaron preescolar
+3 Basica primaria: Que corresponde a aquellas personas que solo terminaron básica primaria, esto es, los grados de primero a quinto
+4 Basica secundaria: Que corresponde a aquellas personas que solo terminaron básica secundaria, esto es, los grados de secto a noveno
+5 Media: Que corresponde a aquellas personas que solo terminaron la educación media, esto es, los grados de noveno a once
+6 Superior - Universitaria: Que corresponde a aquellas personas que terminaron educación superior y/o universitaria
+7 No sabe, No informa
+
+Dicho lo anterior, el análisis de esta variable muestra que la media y la mediana son personas que tienen educación universitaria, lo cual guarda sentido con que sean aquellas que han podido acceder al mercado laboral y encontrarse ocupadas.
+
 ```{r educ_description, echo=FALSE}
-# (5) Descripción de la variable de educación
 
-# Datos en la variable:
-#1 Ninguno
-#2 Preescolar
-#3 Basica primaria (1o - 5o)
-#4 Basica secundaria (60 - 9o)
-#5 Media (10o -13o)
-#6 Superior - Universitaria
-#7 No sabe, No informa
-
-
-educ<- DGEIH$maxEducLevel
-educ_cals <- class(educ)  #Nos dice que es de números enteros (integer)
+educ<- geih_filtered$maxEducLevel
+educ_cals <- class(educ)
+educ_cals
+summary(educ)
 modeEduc <- function(educ){
   return(as.numeric(names(which.max(table(educ)))))
 }
 mod_educ <- modeEduc(educ)      #La moda de la educación es 7 (terciary)
+mod_educ
 
-## Ahora vamos a hacer una gráfica de barras que refleje la cantidad de personas que tienen cada nivel de educación
-## Se utilizarán abreviaturas de las siguiente manera:
-#1 "None"                         = "none
-#2 "preschool"                    = "pre"
-#3 "primary incomplete (1-4)"     = "pri_in"
-#4 "primary complete (5)"         = "pri_com"
-#5 "secondary incomplete (6-10)"  = "sec_in"
-#6 "secondary complete (11)"      = "sec_com"
-#7 "terciary"                     = "ter"
-#9 "N/A";                         = "N/A"... aunque no hay en la base ya limpia
+```
+
+Lo anterior se puede constatar de manera visual en la siguiente gráfica de barras, donde se muestra la manera en que se encuentra distribuida la variable de educación, de acuerdo con la base de datos obtenida:
+
+
+```{r educ_description, echo=FALSE}
 
 # Creamos el data frame
 datos_educ <- data.frame(educ)
@@ -266,11 +307,11 @@ bar_chart <- ggplot(datos_educ, aes(x = as.factor(educ))) +
   geom_bar(fill = "#2E75B6", color = "white") +
   geom_text(stat = 'count', aes(label = ..count..), vjust = -0.5, size = 3, color = 'black') +  # Agregar etiquetas de datos
   labs(x = "Educ", y = "Frecuencia", title = "Distribución de Educación") +
-  scale_x_discrete(labels = c("Ninguno", "Preescolar", "Basc_prim", "Basc_secund", "Media", "Universitaria", "No_informa")) +  # Cambiar las categorías del eje x
+  scale_x_discrete(labels = c("Ninguna", "Preescolar", "Primaria", "Secundaria", "Media", "Universitaria", "No_informa")) +  # Cambiar las categorías del eje x
   theme_minimal() +
   theme(plot.title = element_text(size = 16, face = "bold"),
         axis.title = element_text(size = 14),
-        axis.text = element_text(size = 8),
+        axis.text = element_text(size = 7),
         axis.line.y = element_blank(),  # Eliminar el eje vertical izquierdo
         axis.ticks.y = element_blank(),  # Eliminar los ticks del eje vertical izquierdo
         panel.grid.major = element_blank(),
@@ -285,22 +326,17 @@ table(educ)
 
 ## Descripción sexo
 
-Aquí va el texto
+La variable de género es dummy y toma el valor de 0 si la persona es mujer y toma el valor de 1 si es hombre. Los datos reflejan un total de 4.909 hombres y 4.875 mujeres, como se muestra en la siguiente gráfica de pie.
+
 ```{r sex_description, echo=FALSE}
-# (5) Descripción de la variable de sex
-
-# Datos en la variable:
-#0 Mujer
-#1 Hombre
-
-# (6) Descripción de la variable de género
-sex<- DGEIH$sex
+summary(geih_filtered$sex)
+sex<- geih_filtered$sex
 sex_clas <- class(sex)      #Aquí vemos la clase y nos dice que es integer, es una variable dummy
 sex_tabl <- table(sex)
 # Creamos un data frame con los datos de sexo
 datos_sex <- data.frame(
   Categoría = c("Hombres", "Mujeres"),
-  Cantidad = c(4910, 4874)
+  Cantidad = c(4909, 4875)
 )
 
 # Crear el diagrama de pie con etiquetas de datos
@@ -316,67 +352,34 @@ pie_chart <- ggplot(datos_sex, aes(x = "", y = Cantidad, fill = Categoría)) +
 # Mostrar el diagrama de pie
 print(pie_chart)
 table(sex)
-summary(sex)        #10.047 son hombres (1) y 9.754 son mujeres (0)... tener en cuenta si esto 
 ```
 
-## Descripción ...
+## Descripción de la experiencia
 
-Aquí va el texto
-```{r description_5}
-# # (7) Descripción de la variable de experiencia
-# expp<- DGEIH$exp
-# View(expp)
-# class(expp)         #Aquí vemos la clase y nos dice que es numérica
-# mean(expp)          #Aquí vemos la experiencia media y vemos es de 4.2 años
-# min(expp)           #Aquí vemos la experiencia mínima y vemos que como era de esperar es de 0 años
-# max(expp)           #Aquí vemos la experiencia máxima y vemos que es de 60 años
-# modeExp <- function(expp){
-#   return(as.numeric(names(which.max(table(expp)))))
-# }
-# modeExp(expp)       #Aquí vemos que la moda de la experiencia es de 0 años
-# 
-# 
-# 
-# ###########
-# 
-# # Crear el data frame
-# datos_exp <- data.frame(expp)
-# 
-# # Crear el histograma
-# histograma <- ggplot(datos_exp, aes(x = expp)) +
-#   geom_histogram(binwidth = 1, fill = "#2E75B6", color = "white") +
-#   labs(x = "Experiencia", y = "Frecuencia", title = "Histograma de Experiencia") +
-#   theme_minimal() +
-#   theme(plot.title = element_text(size = 16, face = "bold"),
-#         axis.title = element_text(size = 14),
-#         axis.text = element_text(size = 12))
-# 
-# # Mostrar el histograma
-# print(histograma)
-# 
-# 
-# 
-# ###########
-# 
-# 
-# plot(hist(expp))
-# 
-# 
-# 
-# # (8) Descripción de la variable de oficio
-# library(modeest)
-# Oficio_<- DGEIH$oficio
-# class(Oficio_)
-# levels(Oficio_)
-# summary(Oficio_)
-# table(Oficio_)
-# barplot(table((Oficio_)))
-# mlv(Oficio_, method = "mfv")
-# 
+La variable de experiencia es continua e indica los meses que lleva trabajando la persona en su trabajo actual. La mediana y la moda de esta variable es de 24 meses, la media de 50 meses,  y el valor máximo es de 696 meses.
 
+```{r exp_description, echo=FALSE}
+expp <- geih_filtered$p6426
+expp<- geih_filtered$p6426
+class(expp)         #Aquí vemos la clase y nos dice que es numérica
+summary(expp)
+modeExp <- function(expp){
+   return(as.numeric(names(which.max(table(expp)))))
+ }
+modeExp(expp)       #Que me muestre la moda
+```
+En virtud de lo anterior, el siguiente histograma refleja la distribución de la experiencia, donde se observa que la mayoría de observaciones se ubican entre 0 y 50 meses, lo cual guarda sentido con que los datos de media señalados previamente.
+
+```{r exp_description, echo=FALSE}
+# Generar el histograma
+histograma <- hist(geih_filtered$p6426, breaks = seq(0, 700, by = 50), col = "#2E75B6", border = "white",
+                   xlab = "Experiencia (meses)", ylab = "Frecuencia", main = "Histograma de Experiencia")
+
+# Personalizar la apariencia del histograma
+par(las = 1)  # Orientación de etiquetas de ejes
+box()  # Agregar un marco alrededor del histograma
 
 ```
-
 
 
 ## Age-wage profile

@@ -41,7 +41,7 @@ sum(is.na(db_geih$age)) # Checking for missing values
 sum(is.na(db_geih$ocu))
 
 db_geih_filtered <- db_geih[db_geih$age > 18 & db_geih$ocu == 1, ]
-save(db_geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
+save(db_geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/completedata.Rdata")
 
 ## Dealing with missing values
 # Count missing values for each column and sorting
