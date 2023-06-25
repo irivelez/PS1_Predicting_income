@@ -134,6 +134,10 @@ donde w representa el salario por hora y X es una matriz de potenciales variable
 
 Para importar los datos, es importante conocer qué tipo de página web contiene la información, en este caso, la página web que contiene las bases de datos es dinámica, por lo que es pertinente identificar el link principal del cual se realizará la extracción de la información; además, se apliará un código en bucle para que la extracción de la informacíon sea más eficiente.Por último, como fue indicado, se realiza un primer filtro para tener en cuenta únicamente los individuos mayores de 18 años.
 
+# Descripción de los datos
+## Descripción general
+
+Aquí va el texto
 ```{r general_description, echo=FALSE}
 # Aquí hacemos la clasificación de variables
 exp <- floor(c(geih_filtered$p6426/12)) #Ponemos anual la variable de experiencia
@@ -145,6 +149,9 @@ DGEIH<-cbind(DGEIH, exp) #Incluimos las variables calculadas que revisaremos
 summary(DGEIH)
 ```
 
+## Descripción edad
+
+Aquí va el texto
 ```{r age_description, echo=FALSE}
 # (1) Descripción general de la base
 dimen_dgeih <- dim(DGEIH)  #Número de filas y columnas
@@ -183,6 +190,9 @@ print(bar_chart)
 summary(Edad)
 ```
 
+## Descripción ocupación
+
+Aquí va el texto
 ```{r ocup_description, echo=FALSE}
 # (4) Descripción de la variable de ocupación
 ocu<- DGEIH$ocu
@@ -214,6 +224,9 @@ print(pie_chart)
 summary(ocu)  
 ```
 
+## Descripción educación
+
+Aquí va el texto
 ```{r educ_description, echo=FALSE}
 # (5) Descripción de la variable de educación
 
@@ -270,6 +283,9 @@ summary(educ)
 table(educ)
 ```
 
+## Descripción sexo
+
+Aquí va el texto
 ```{r sex_description, echo=FALSE}
 # (5) Descripción de la variable de sex
 
@@ -303,6 +319,9 @@ table(sex)
 summary(sex)        #10.047 son hombres (1) y 9.754 son mujeres (0)... tener en cuenta si esto 
 ```
 
+## Descripción ...
+
+Aquí va el texto
 ```{r description_5}
 # # (7) Descripción de la variable de experiencia
 # expp<- DGEIH$exp
