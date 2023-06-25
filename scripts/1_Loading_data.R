@@ -30,7 +30,6 @@ db_list <- lapply(1:10, function(i) {
 })
 
 db_geih <- do.call(rbind,db_list) # Concatenate the tables in a dataframe
-view(db_geih)
 
 
 ### Transforming data
@@ -48,7 +47,7 @@ save(db_geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predictin
 # Count missing values for each column and sorting
 missing_counts <- sapply(db_geih_filtered, function(x) sum(is.na(x)))
 sorted_missing <- sort(missing_counts, decreasing = TRUE)
-top_missing <- head(sorted_missing, 30)
+top_missing <- head(sorted_missing, 20)
 top_missing
 
 # Deleting the top missing variables and all variables that start with cclasnr
@@ -68,19 +67,16 @@ summary(geih_filtered$y_ingLab_m_ha)   # labor income salaried nominal hourly
 summary(geih_filtered$y_salary_m)      # salary - nominal monthly
 summary(geih_filtered$y_salary_m_hu)   # salary - real hourly (usual)
 
-missing_income <- sum(is.na(geih_filtered$y_ingLab_m_ha))
-obs <- nrow(geih_filtered)
-
 # The 40.32% of the observations for the main resultant variables have missing values
-missing_perc = (missing_income/obs)*100
+missing_values <- is.na(geih_filtered$y_salary_m_hu)
+
+missing_perc = (sum(missing_values)/nrow(geih_filtered))*100
 missing_perc
 
-missing_values <- is.na(geih_filtered$y_salary_m_hu)
 missing_data <- geih_filtered[missing_values, c("estrato1", "maxEducLevel")]
 
 missing_by_estrato <- table(missing_data$estrato1)
 missing_by_educ <- table(missing_data$maxEducLevel)
-
 
 missing_by_estrato <- sort(missing_by_estrato, decreasing = TRUE)
 missing_by_educ <- sort(missing_by_educ, decreasing = TRUE)
@@ -91,7 +87,7 @@ missing_by_educ_p <- missing_by_educ / sum(missing_by_educ) * 100
 missing_by_estrato_p
 missing_by_educ_p
 
-# Data frame with the results
+# Data frame with missing values by estrato and educación
 results <- data.frame(estrato = names(missing_by_estrato_p),
                       educacion = names(missing_by_educ_p),
                       p_missing_estrato = missing_by_estrato_p,
@@ -99,6 +95,10 @@ results <- data.frame(estrato = names(missing_by_estrato_p),
 
 knitr::kable(results, caption = "Missing Values by Estrato and Educación")
 
+'''
+Finally, we decided to eliminate observations containing missing values 
+for the resultant variable (y_salary_m_hu)
+'''
+
 geih_filtered <- geih_filtered[complete.cases(geih_filtered$y_salary_m_hu), ]
 save(geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
-
