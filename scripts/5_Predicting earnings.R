@@ -19,7 +19,6 @@ p_load(tidyverse, rvest, stargazer)
 
 ### Loading data
 setwd("/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores")
-load("completedata.Rdata")
 load("data.Rdata")
 glimpse(geih_filtered)
 
