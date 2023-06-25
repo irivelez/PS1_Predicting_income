@@ -63,6 +63,59 @@ cat("El MSE para la refresión con el teorema FWL:", mse_step_3, "\n")
 
 ## Modelo FWL con Boostrap ----
 
+# Bootstrap para reg_gendergap_step_3
+eta_fn3 <- function(data, index) {
+  regress_step_1 <- lm(female ~ age + age_2 + totalHoursWorked + educ, data = data, subset = index)
+  residuals_step_1 <- regress_step_1$residuals
+  
+  regress_step_2 <- lm(log_salarioreal ~ age + age_2 + totalHoursWorked + educ, data = data, subset = index)
+  residuals_step_2 <- regress_step_2$residuals
+  
+  data_step_3 <- data[index, ]  # Subconjunto de datos para el paso 3
+  
+  # Agregar residuos al conjunto de datos para el paso 3
+  data_step_3$female_resid <- residuals_step_1
+  data_step_3$lnw_resid <- residuals_step_2
+  
+  regress_step_3 <- lm(lnw_resid ~ female_resid, data = data_step_3)
+  
+  coef(regress_step_3)
+}
+
+boot_results3 <- boot(geih_filtered, eta_fn3, R = 1000)
+boot_results3
+
+# Intervalos de confianza
+boot_ci3 <- boot.ci(boot_results3, type = "basic")  
+boot_ci3
+
+# MES ----
+# Calcular el MSE para reg_gendergap_3 (Modelo long)
+mse_reg_3 <- mean(reg_gendergap_3$residuals^2)
+mse_reg_3
+
+# Calcular el MSE para reg_gendergap_step_3 (Modelo FWL)
+mse_step_3 <- mean(reg_gendergap_step_3$residuals^2)
+mse_step_3
+
+# Calcular el MSE promedio del bootstrap para reg_gendergap_step_3 (Modelo FWL con Boostrap)
+mse_boot_step_3 <- mean(boot_results3$t^2)
+
+# Tabla
+mse_table_p3 <- data.frame(Modelo = c( "Modelo long","Modelo FW", "Modelo FWL con Boostrap"),
+                        MSE = c(mse_reg_3,mse_step_3, mse_boot_step_3))
+
+# Asignar nombres a las columnas
+names(mse_table_p3) <- c("Modelo", "MSE")
+
+# Imprimir la tabla
+print(mse_table)
+
+
+
+
+
+## Discusión Peak Age, comparar con el punto anterior
 
 
 
