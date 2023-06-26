@@ -10,9 +10,12 @@ The repo should contain at least four folders:
 - `views`: contains all figures and tables
 
 
+## Some general instructions 
 
-## Some general reminders: 
+Instructions
 
-- It is essential how you write up the document. Be sure to be organized and consistent in explaining your equations and findings. Make sure that there are no compilation errors.
-- Write understandable code, separating and commenting on each section. Coding, like in writing, style is critical for readability. If the code is well written, it should be self-contained. There is no need to write everything you did. I encourage you to follow the [tidyverse style guide](https://style.tidyverse.org/)
+The database used for the entire workshop is available in the stores folder of the repository and is called data.Rdata.
 
+To replicate the work in Rmarkdown it is not necessary to run the lines of code corresponding to the Import_data and Transforming_data chunks, since they process the information directly from the pages and perform the data transformation; instead, the Import_DB chunk can be used to import the transformed database.
+
+Additionally, it is important to note that point 5 will take time as it must iterate the 2 models for all observations. However, to facilitate this, the base available in stores should be loaded.
