@@ -201,7 +201,7 @@ results <- data.frame(model = factor (c("Model1", "Model2",
 set.seed(10101)
 
 # In LOOCV k = n
-K <- 9000
+K <- 9700
 
 # Vectors to store the predicted values and mse
 predict_model12 <- vector("numeric", K)
