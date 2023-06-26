@@ -205,9 +205,9 @@ K <- 9700
 
 # Vectors to store the predicted values and mse
 predict_model12 <- vector("numeric", K)
-predict_model14 <- vector("numeric", K)
+predict_model13 <- vector("numeric", K)
 mse_model12 <- vector("numeric", K)
-mse_model14 <- vector("numeric", K)
+mse_model13 <- vector("numeric", K)
 
 # Perform LOOCV
 for (i in 1:K) {
@@ -216,20 +216,20 @@ for (i in 1:K) {
   test_data <- playgroundb[i, ]
   
   # Fitting the models
-  model15 <- lm(log_salariorealh ~ age + age2 + educ + exp + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1, data = train_data)
-  model16 <- lm(log_salariorealh ~ age + age2 + educ + exp + exp2 + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1 + p7040, data = train_data)
+  model14 <- lm(log_salariorealh ~ age + age2 + educ + exp + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1, data = train_data)
+  model15 <- lm(log_salariorealh ~ age + age2 + educ + exp + exp2 + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1 + p7040, data = train_data)
   
   # Testing the models
-  predict_model12[i] <- predict(model15, newdata = test_data)
-  predict_model14[i] <- predict(model16, newdata = test_data)
+  predict_model12[i] <- predict(model14, newdata = test_data)
+  predict_model13[i] <- predict(model15, newdata = test_data)
   
   # Calculating the MSE
   mse_model12[i] <- with(test_data, (log_salariorealh - predict_model12[i])^2)
-  mse_model14[i] <- with(test_data, (log_salariorealh - predict_model14[i])^2)
+  mse_model13[i] <- with(test_data, (log_salariorealh - predict_model13[i])^2)
 }
 
 mean_mse_model12 <- mean(mse_model12)
-mean_mse_model14 <- mean(mse_model14)
+mean_mse_model13 <- mean(mse_model13)
 
 cat("LOOCV MSE for Model 12:", mean_mse_model12, "\n")
-cat("LOOCV MSE for Model 14:", mean_mse_model14, "\n")
+cat("LOOCV MSE for Model 14:", mean_mse_model13, "\n")
