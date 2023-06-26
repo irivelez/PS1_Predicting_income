@@ -832,40 +832,54 @@ $$
 set.seed(10101)
 
 # In LOOCV k = n
-K <- 9700
+K <- 9000
 
 # Vectors to store the predicted values and mse
 predict_model12 <- vector("numeric", K)
-predict_model14 <- vector("numeric", K)
+predict_model13 <- vector("numeric", K)
 mse_model12 <- vector("numeric", K)
-mse_model14 <- vector("numeric", K)
+mse_model13 <- vector("numeric", K)
 
 # Perform LOOCV
-
 for (i in 1:K) {
   # Training and testing set
   train_data <- playgroundb[-i, ]
   test_data <- playgroundb[i, ]
   
   # Fitting the models
-  model15 <- lm(log_salariorealh ~ age + age2 + educ + exp + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1, data = train_data)
-  model16 <- lm(log_salariorealh ~ age + age2 + educ + exp + exp2 + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1 + p7040, data = train_data)
+  model14 <- lm(log_salariorealh ~ age + age2 + educ + exp + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1, data = train_data)
+  model15 <- lm(log_salariorealh ~ age + age2 + educ + exp + exp2 + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1 + p7040, data = train_data)
   
   # Testing the models
-  predict_model12[i] <- predict(model15, newdata = test_data)
-  predict_model14[i] <- predict(model16, newdata = test_data)
+  predict_model12[i] <- predict(model14, newdata = test_data)
+  predict_model13[i] <- predict(model15, newdata = test_data)
   
   # Calculating the MSE
   mse_model12[i] <- with(test_data, (log_salariorealh - predict_model12[i])^2)
-  mse_model14[i] <- with(test_data, (log_salariorealh - predict_model14[i])^2)
+  mse_model13[i] <- with(test_data, (log_salariorealh - predict_model13[i])^2)
 }
 
 mean_mse_model12 <- mean(mse_model12)
-mean_mse_model14 <- mean(mse_model14)
+mean_mse_model13 <- mean(mse_model13)
 
 cat("LOOCV MSE for Model 12:", mean_mse_model12, "\n")
-cat("LOOCV MSE for Model 14:", mean_mse_model14, "\n")
+cat("LOOCV MSE for Model 13:", mean_mse_model13, "\n")
 ```
+Con el enfoque de validación cruzada previa, los modelos que arrojaron los menores valores para el error cuadrático medio fueron el model12 y model13 con los siguientes valores:
 
+        Model12 0.2278255
+        Model13 0.2279195
 
+Por lo tanto, usando los modelos anteriores, se realizó el ajuste para ambos usando el enfoque de LOOCV. Los resultados mostraron que hay una disminución en el error cuadrático medio, sin embargo no es una reducción tan significativa.
 
+        LOOCV MSE for Model 12: 0.2252269 
+        LOOCV MSE for Model 13: 0.2249212 
+
+Lo cierto es que con el primer enfoque de validación cruzada se alcanzaron valores del error cuadrático medio bajos, y estos nuevos resultados con LOOCV fueron tan sólo un poco menores.
+
+Realizar la validación de predicción de los datos usando el enfoque LOOCV permite evidenciar que entrenar el modelo con una mayor cantidad de muestras de entrenamiento, y validarlo con las diferentes observaciones de todo el dataset, permite que la influencia estadística contribuya a valores menores en el error cuadrático medio.
+
+NOTA: Es importante mencionar que al intentar ejecutar el loop con el total de las observaciones del dataset 9785, o incluso con 9784, los errores cuádraticos medios nos arrojaban valores no válidos. Es por esto que decidimos, realizar la prueba del loop primero con K = 100, luego K = 1000, y por último K = 9000, generando valores para los MSE, ya que no logramos corregir el loop para que funcionara con el 100% de las observaciones.
+
+    LOOCV MSE for Model 12: NA 
+    LOOCV MSE for Model 14: NA 
