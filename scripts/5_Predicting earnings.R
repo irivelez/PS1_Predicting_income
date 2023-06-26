@@ -107,6 +107,7 @@ regresion_salario_edad$coefficients
 -regresion_salario_edad$coefficients[2]/(2*regresion_salario_edad$coefficients[3])
 
 
+### Validation Set Approach ###
 ### Split the sample into two: a training (70%) and a testing (30%) sample.
 ## Using the data.Rdata database. This db is without missing values for the resultant variable (y_salary_m_hu)
 
@@ -203,3 +204,41 @@ results <- data.frame(model = factor (c("Model1", "Model2",
                                         "Model11", "Model12",
                                         "Model13", "Model14"), ordered = TRUE),
                       MSE = mse)
+
+### LOOCV ###
+# Making this example reproducible
+set.seed(10101)
+
+# In LOOCV k = n
+K <- 9000
+
+# Vectors to store the predicted values and mse
+predict_model12 <- vector("numeric", K)
+predict_model14 <- vector("numeric", K)
+mse_model12 <- vector("numeric", K)
+mse_model14 <- vector("numeric", K)
+
+# Perform LOOCV
+for (i in 1:K) {
+  # Training and testing set
+  train_data <- playgroundb[-i, ]
+  test_data <- playgroundb[i, ]
+  
+  # Fitting the models
+  model15 <- lm(log_salariorealh ~ age + age2 + educ + exp + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1, data = train_data)
+  model16 <- lm(log_salariorealh ~ age + age2 + educ + exp + exp2 + hoursWorkUsual + totalHoursWorked + female + p7500s1a1 + p7510s5a1 + p7510s6a1 + p7510s7a1 + p6920 + informal + sizeFirm + estrato1 + p7040, data = train_data)
+  
+  # Testing the models
+  predict_model12[i] <- predict(model15, newdata = test_data)
+  predict_model14[i] <- predict(model16, newdata = test_data)
+  
+  # Calculating the MSE
+  mse_model12[i] <- with(test_data, (log_salariorealh - predict_model12[i])^2)
+  mse_model14[i] <- with(test_data, (log_salariorealh - predict_model14[i])^2)
+}
+
+mean_mse_model12 <- mean(mse_model12)
+mean_mse_model14 <- mean(mse_model14)
+
+cat("LOOCV MSE for Model 12:", mean_mse_model12, "\n")
+cat("LOOCV MSE for Model 14:", mean_mse_model14, "\n")
