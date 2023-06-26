@@ -3,15 +3,6 @@
 #           Big data and Machine Learning
 #             Universidad de los Andes
 ##########################################################
-'''
-Authors:
-
-- Daniel Casas Bautista
-- Lucia Fillippo
-- Miguel Angel Victoria Simbaqueva 
-- Irina Andrea Vélez López
-'''
-
 ### Initial Configuration
 if(!require(pacman)) install.packages("pacman")
 require(pacman)
