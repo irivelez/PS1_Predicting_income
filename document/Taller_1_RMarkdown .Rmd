@@ -689,7 +689,7 @@ train <- playgroundb %>% dplyr::sample_frac(0.70)
 test <- dplyr::anti_join(playgroundb, train, by = 'id')
 ```
 
-En virtud de lo anterior se crearon una serie de modelos, con el objetivo de calcular el menor MSE, esto es, identificar el modelo que mejor prediga el salario.
+En virtud de lo anterior se ejecutó la validación cruzada con una serie de modelos, con el objetivo de calcular el menor error cuadrático medio, esto es, identificar el modelo que mejor prediga el salario real por hora.
 
 ## Modelo 1: Edad de la persona
 ```{r model_1, echo=FALSE}
