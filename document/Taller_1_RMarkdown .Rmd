@@ -36,87 +36,87 @@ setwd(path_folder)
 
 ```{r Import_data, eval=FALSE, include=FALSE}
 ### Loading data  
-#data_url = "https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_"
+data_url = "https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_"
 
 # Loop
-#db_list <- lapply(1:10, function(i) {
-#  url <- paste0(data_url, "page_", i, ".html")
-#  page <- read_html(url) 
-#  tabla <- page %>% html_table
-#  db_geih <- data.frame(tabla)
+db_list <- lapply(1:10, function(i) {
+  url <- paste0(data_url, "page_", i, ".html")
+  page <- read_html(url) 
+  tabla <- page %>% html_table
+  db_geih <- data.frame(tabla)
 })
 
-#db_geih <- do.call(rbind,db_list) # Concatenate the tables in a dataframe
+db_geih <- do.call(rbind,db_list) # Concatenate the tables in a dataframe
 view(db_geih)
 ```
 
 ```{r Transforming_data, eval=FALSE, include=FALSE}
 ##Filtering the data to those over 18 and employed (ocu=1)
 # Details of the variable age 
-#summary(db_geih$age)
-#sum(is.na(db_geih$age)) # Checking for missing values
-#sum(is.na(db_geih$ocu))
+summary(db_geih$age)
+sum(is.na(db_geih$age)) # Checking for missing values
+sum(is.na(db_geih$ocu))
 
-#db_geih_filtered <- db_geih[db_geih$age > 18 & db_geih$ocu == 1, ]
-#save(db_geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
+db_geih_filtered <- db_geih[db_geih$age > 18 & db_geih$ocu == 1, ]
+save(db_geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
 
 ## Dealing with missing values
 # Count missing values for each column and sorting
-#missing_counts <- sapply(db_geih_filtered, function(x) sum(is.na(x)))
-#sorted_missing <- sort(missing_counts, decreasing = TRUE)
-#top_missing <- head(sorted_missing, 30)
-#top_missing
+missing_counts <- sapply(db_geih_filtered, function(x) sum(is.na(x)))
+sorted_missing <- sort(missing_counts, decreasing = TRUE)
+top_missing <- head(sorted_missing, 30)
+top_missing
 
 # Deleting the top missing variables and all variables that start with cclasnr
-#delete_var <- c("p550", "p7310", "p7350", "p7422", "p7422s1", "p7472", "p7472s1", "ina", "imdi", "imdies", "y_gananciaNetaAgro_m", "iof3ies", "y_accidentes_m", "p6585s4a2", "y_subEducativo_m", "isaes", "iof2es", "dominio", "clase")
-#delete_var2 <- grep("^cclasnr", names(db_geih_filtered), value = TRUE)
-#delete_t <- c(delete_var, delete_var2)
+delete_var <- c("p550", "p7310", "p7350", "p7422", "p7422s1", "p7472", "p7472s1", "ina", "imdi", "imdies", "y_gananciaNetaAgro_m", "iof3ies", "y_accidentes_m", "p6585s4a2", "y_subEducativo_m", "isaes", "iof2es", "dominio", "clase")
+delete_var2 <- grep("^cclasnr", names(db_geih_filtered), value = TRUE)
+delete_t <- c(delete_var, delete_var2)
 
-#geih_filtered <- db_geih_filtered %>%
-#  select(-one_of(delete_t))
+geih_filtered <- db_geih_filtered %>%
+  select(-one_of(delete_t))
 
 ## Dealing with 0 wages
 
 # Verification of the min and max value of the main resultant variables, and their missing values
-#summary(geih_filtered$p6500)           # Monthly labor income. DANE Variable
-#summary(geih_filtered$y_ingLab_m)      # labor income salaried nominal monthly
-#summary(geih_filtered$y_ingLab_m_ha)   # labor income salaried nominal hourly
-#summary(geih_filtered$y_salary_m)      # salary - nominal monthly
-#summary(geih_filtered$y_salary_m_hu)   # salary - real hourly (usual)
+summary(geih_filtered$p6500)           # Monthly labor income. DANE Variable
+summary(geih_filtered$y_ingLab_m)      # labor income salaried nominal monthly
+summary(geih_filtered$y_ingLab_m_ha)   # labor income salaried nominal hourly
+summary(geih_filtered$y_salary_m)      # salary - nominal monthly
+summary(geih_filtered$y_salary_m_hu)   # salary - real hourly (usual)
 
-#missing_income <- sum(is.na(geih_filtered$y_ingLab_m_ha))
-#obs <- nrow(geih_filtered)
+missing_income <- sum(is.na(geih_filtered$y_ingLab_m_ha))
+obs <- nrow(geih_filtered)
 
 # The 40.32% of the observations for the main resultant variables have missing values
-#missing_perc = (missing_income/obs)*100
-#missing_perc
+missing_perc = (missing_income/obs)*100
+missing_perc
 
-#missing_values <- is.na(geih_filtered$y_salary_m_hu)
-#missing_data <- geih_filtered[missing_values, c("estrato1", "maxEducLevel")]
+missing_values <- is.na(geih_filtered$y_salary_m_hu)
+missing_data <- geih_filtered[missing_values, c("estrato1", "maxEducLevel")]
 
-#missing_by_estrato <- table(missing_data$estrato1)
-#missing_by_educ <- table(missing_data$maxEducLevel)
+missing_by_estrato <- table(missing_data$estrato1)
+missing_by_educ <- table(missing_data$maxEducLevel)
 
 
-#missing_by_estrato <- sort(missing_by_estrato, decreasing = TRUE)
-#missing_by_educ <- sort(missing_by_educ, decreasing = TRUE)
+missing_by_estrato <- sort(missing_by_estrato, decreasing = TRUE)
+missing_by_educ <- sort(missing_by_educ, decreasing = TRUE)
 
-#missing_by_estrato_p <- missing_by_estrato / sum(missing_by_estrato) * 100
-#missing_by_educ_p <- missing_by_educ / sum(missing_by_educ) * 100
+missing_by_estrato_p <- missing_by_estrato / sum(missing_by_estrato) * 100
+missing_by_educ_p <- missing_by_educ / sum(missing_by_educ) * 100
 
-#missing_by_estrato_p
-#missing_by_educ_p
+missing_by_estrato_p
+missing_by_educ_p
 
 # Data frame with the results
-#results <- data.frame(estrato = names(missing_by_estrato_p),
-#                      educacion = names(missing_by_educ_p),
-#                      p_missing_estrato = missing_by_estrato_p,
-#                      p_missing_educacion = missing_by_educ_p)
+results <- data.frame(estrato = names(missing_by_estrato_p),
+                      educacion = names(missing_by_educ_p),
+                      p_missing_estrato = missing_by_estrato_p,
+                      p_missing_educacion = missing_by_educ_p)
 
-#knitr::kable(results, caption = "Missing Values by Estrato and Educación")
+knitr::kable(results, caption = "Missing Values by Estrato and Educación")
 
-#geih_filtered <- geih_filtered[complete.cases(geih_filtered$y_salary_m_hu), ]
-#save(geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
+geih_filtered <- geih_filtered[complete.cases(geih_filtered$y_salary_m_hu), ]
+save(geih_filtered, file = "/Users/irina/Documents/Repositorios/PS1_Predicting_income/stores/data.Rdata")
 ```
 
 ```{r Import_DB, include=FALSE}
@@ -126,7 +126,11 @@ geih_filtered <- geih_filtered[complete.cases(geih_filtered$maxEducLevel), ]
 
 # Taller 1
 
-El presente informe presenta la solución al Problem Set 1 de la clase Big Data & Machine Learning, con el objetivo de aplicar diversos conceptos y herramientas para la predicción de modelos, el manejo de bases de datos grandes, entre otros. Para el desarrollo del trabajo se utilizó el repositorio GitHub el cual contiene información de la Gran Encuesta Integrada de Hogares - GEIH para el año 2018 (luego en word ponemos este hiperbínculo https://ignaciomsarmiento.github.io/GEIH2018_sample/); además, se empleó el sotware Rstudio para el manejo de los datos, generación de resultados y desarrollo del taller, cuyo código se encuentra en el siguiente link: (link del Github con el código)
+El presente informe presenta la solución al Problem Set 1 de la clase Big Data & Machine Learning, con el objetivo de aplicar diversos conceptos y herramientas para la predicción de modelos, el manejo de bases de datos grandes, entre otros. Para el desarrollo del trabajo se utilizó el repositorio GitHub el cual contiene información de la Gran Encuesta Integrada de Hogares - GEIH para el año 2018, luego en word ponemos este hiperbínculo:
+
+https://ignaciomsarmiento.github.io/GEIH2018_sample/
+
+Además, se empleó el sotware Rstudio para el manejo de los datos, generación de resultados y desarrollo del taller, cuyo código se encuentra en el siguiente link: (link del Github con el código)
 
 ## 1. Introducción
 
@@ -142,21 +146,6 @@ Para importar los datos, es importante conocer qué tipo de página web contiene
 
 # Descripción de los datos
 ## Descripción general
-
-```{r general_description, echo=FALSE}
-# Aquí hacemos la clasificación de variables
-exp <- floor(c(geih_filtered$p6426/12)) #Ponemos anual la variable de experiencia
-DGEIH<-subset(geih_filtered, select = c( "y_salary_m_hu", "pet", "mes", "age", "sex","ocu", "oficio", "maxEducLevel","totalHoursWorked")) 
-
-#Hacemos un subset con las variables a usar
-DGEIH<-cbind(DGEIH, exp) #Incluimos las variables calculadas que revisaremos
-
-summary(DGEIH)
-
-```
-
-<<<<<<< HEAD
-
 ## Análisis descriptivo
 =======
 
@@ -172,6 +161,19 @@ De manera general, se identifica que nuestra base de datos está compuesta por 9
 - (maxEducLevel): Indicar el máximo nivel educativo alcanzado
 - (totalHoursWorked): Indica el total de horas trabajadas en el último mes
 - (exp): Hace referencia a la experiencia en años que tiene la persona
+
+```{r general_description, echo=FALSE}
+# Aquí hacemos la clasificación de variables
+exp <- floor(c(geih_filtered$p6426/12)) #Ponemos anual la variable de experiencia
+DGEIH<-subset(geih_filtered, select = c( "y_salary_m_hu", "pet", "mes", "age", "sex","ocu", "oficio", "maxEducLevel","totalHoursWorked")) 
+
+#Hacemos un subset con las variables a usar
+DGEIH<-cbind(DGEIH, exp) #Incluimos las variables calculadas que revisaremos
+
+summary(DGEIH)
+
+```
+
 
 ```{r age_description_1, echo=FALSE}
 # (1) Descripción general de la base
@@ -486,7 +488,6 @@ reg_gendergap_1 <- lm(log_salarioreal~female, geih_filtered)
 reg_gendergap_3 <- lm(log_salarioreal~female+age+age_2+totalHoursWorked+educ,geih_filtered)
 
 stargazer(reg_gendergap_1,reg_gendergap_3,type="text")
-
 ```
 
 Podemos observar que al realizar el modelo solo con la variable Female, la diferencia salarial entre los hombres y mujeres es de 4.7%; sin embargo, luego de añadir las variables de control, se evidencia que la diferencia salarial es aún más significativa, las mujeres ganan en promedio 18.1% menos que los hombres, manteniendo las demás variables constantes, en ambos casos, el coeficiente es significativo al 99% de confianza.
@@ -580,16 +581,7 @@ points(geih_filtered$age, y_estimados_gendergap, pch = 16, col = "green")
 
 En este caso, se evidencia que los datos estimados parecen seguir el comportamiento de los valores reales y, similar a la gráfica en donde solo se tiene en cuenta la edad, se observa un crecimiento de los datos hasta mediados de los años 50, luego esto, se nota un leve decrecimiento en el salario.
 
-
-
-# Notas
-Sustentar todas las medidas que salgan en las regresiones
-Exportar salidas de regresión con stargazer
-
-
-
 # Punto 5
-
 
 Dividiendo la muestra en dos submuestras, la primera de ellas (70%) para entrenamiento y la segunda (30%) como muestra de prueba, se procedió a realizar una predicción del ingreso. Ahora bien, para lograr esto se incluyó además una semilla de 10101. Se eligirán a partir de dicha base de datos una serie de posibles predictores:
 

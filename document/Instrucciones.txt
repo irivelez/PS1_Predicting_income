@@ -1,9 +1,0 @@
-Instrucciones
-
-Para replicar el trabajo, En Rmarkdown no es necesario correr las líneas de código correspondientes a los chunks Import_data y Transforming_data ya que estos sacan la información de las páginas y realizan la transformación de los datos; en su lugar, se puede utilizar el chunk Import_DB para importar la base de datos transformada.
-
-
-
-
-
-
