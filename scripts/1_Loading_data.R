@@ -51,7 +51,7 @@ top_missing <- head(sorted_missing, 20)
 top_missing
 
 # Deleting the top missing variables and all variables that start with cclasnr
-delete_var <- c("p550", "p7310", "p7350", "p7422", "p7422s1", "p7472", "p7472s1", "ina", "imdi", "imdies", "y_gananciaNetaAgro_m", "iof3ies", "y_accidentes_m", "p6585s4a2", "y_subEducativo_m", "isaes", "iof2es", "dominio", "clase")
+delete_var <- c("p550", "p7310", "p7350", "p7422", "p7422s1", "p7472", "p7472s1", "ina", "imdi", "imdies", "y_gananciaNetaAgro_m", "iof3ies", "y_accidentes_m", "p6585s4a2", "y_subEducativo_m", "isaes", "iof2es", "dominio")
 delete_var2 <- grep("^cclasnr", names(db_geih_filtered), value = TRUE)
 delete_t <- c(delete_var, delete_var2)
 

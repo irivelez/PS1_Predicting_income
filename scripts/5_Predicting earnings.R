@@ -195,6 +195,7 @@ results <- data.frame(model = factor (c("Model1", "Model2",
                                         "Model11", "Model12",
                                         "Model13", "Model14"), ordered = TRUE),
                       MSE = mse)
+results
 
 ### LOOCV ###
 # Making this example reproducible
@@ -232,4 +233,4 @@ mean_mse_model12 <- mean(mse_model12)
 mean_mse_model13 <- mean(mse_model13)
 
 cat("LOOCV MSE for Model 12:", mean_mse_model12, "\n")
-cat("LOOCV MSE for Model 14:", mean_mse_model13, "\n")
+cat("LOOCV MSE for Model 13:", mean_mse_model13, "\n")

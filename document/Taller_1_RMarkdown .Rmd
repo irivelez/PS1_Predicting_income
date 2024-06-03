@@ -7,7 +7,8 @@ output: word_document
 ```{r setup, include=FALSE}
 
 # install pacman
-if(!require(pacman)) install.packages("pacman") ; require(pacman)
+if(!require(pacman)) install.packages("pacman")
+require(pacman)
 
 ## Automatiza cargue de paquetes
 require(pacman)
